@@ -928,6 +928,30 @@ export default function ManualPage() {
                 </div>
               ))}
             </div>
+            <div className="mn-stagger" style={{ marginTop: 30, display: "grid", gap: 24 }}>
+              <div style={{ fontWeight: 700, fontSize: 15, color: "var(--text-secondary)" }}>ตัวอย่างหน้าจอคอนโซล</div>
+              <div>
+                <figure className="mn-figure-card">
+                  {/* eslint-disable-next-line @next/next/no-img-element -- static /manual asset */}
+                  <img src="/manual/admin-aai.png" alt="แดชบอร์ด AAI ของผู้ดูแล — Overall AAI และ 4 มิติ ของทุกโครงการ ไล่ดูรายจังหวัด/อำเภอ/ตำบล" />
+                </figure>
+                <figcaption className="mn-figcap" style={{ marginTop: 8 }}>แดชบอร์ด AAI — ภาพรวมทุกโครงการ · <span style={{ color: "var(--text-accent)", fontWeight: 600 }}>ข้อมูลตัวอย่าง</span></figcaption>
+              </div>
+              <div>
+                <figure className="mn-figure-card">
+                  {/* eslint-disable-next-line @next/next/no-img-element -- static /manual asset */}
+                  <img src="/manual/admin-leaderboard.png" alt="อันดับการส่งข้อมูลของทุกโครงการ — โพเดียม 3 อันดับแรก" />
+                </figure>
+                <figcaption className="mn-figcap" style={{ marginTop: 8 }}>อันดับการส่งข้อมูล · <span style={{ color: "var(--text-accent)", fontWeight: 600 }}>ข้อมูลตัวอย่าง</span></figcaption>
+              </div>
+              <div>
+                <figure className="mn-figure-card">
+                  {/* eslint-disable-next-line @next/next/no-img-element -- static /manual asset */}
+                  <img src="/manual/admin-settings.png" alt="ตั้งค่าการแจ้งเตือนอัตโนมัติ — วันครบกำหนด แจ้งล่วงหน้า ความถี่ และเวลาส่ง" />
+                </figure>
+                <figcaption className="mn-figcap" style={{ marginTop: 8 }}>ตั้งค่าการแจ้งเตือน · <span style={{ color: "var(--text-accent)", fontWeight: 600 }}>ข้อมูลตัวอย่าง</span></figcaption>
+              </div>
+            </div>
             <div style={{ marginTop: 20 }}>
               <span className="mn-chip"><IconShieldLock size={14} /> เข้าด้วยรหัสผ่านกลาง แยกจาก LINE</span>
             </div>
