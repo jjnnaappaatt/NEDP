@@ -38,6 +38,7 @@ export function Reveal({
     gsap.registerPlugin(ScrollTrigger);
     let revealTween: ReturnType<typeof gsap.fromTo> | undefined;
     const staggerTweens: ReturnType<typeof gsap.fromTo>[] = [];
+    const staggerGrids: HTMLElement[] = [];
     const ctx = gsap.context(() => {
       revealTween = gsap.fromTo(
         el,
@@ -51,6 +52,7 @@ export function Reveal({
       );
       // card grids marked .mn-stagger rise one-by-one on top of the block fade
       el.querySelectorAll<HTMLElement>(".mn-stagger").forEach((grid) => {
+        staggerGrids.push(grid);
         staggerTweens.push(gsap.fromTo(
           grid.children,
           { opacity: 0, y: 16 },
@@ -62,42 +64,79 @@ export function Reveal({
         ));
       });
     }, el);
-    // Fallback for anchor landings (a fresh #hash load OR an in-app nav-link click). When the browser
-    // jumps straight to a section instead of scrolling through its trigger point, GSAP's once-on-scroll
-    // tween can skip firing (block stays hidden) OR get caught mid-fade (the block looks half-faded — the
-    // "is this broken?" state). So on ANY landing we snap the target block to fully revealed. Normal
-    // top-to-bottom scrolling (no anchor) is untouched — those fade-ins still play.
+
+    // Force this block (and its stagger children) fully visible — immediately and irreversibly.
+    // A scrollTrigger-driven tween is created PAUSED and played by the trigger; on an anchor jump the
+    // `once` fade can start then stall PAUSED mid-fade (the "stuck at ~9% opacity" bug on /manual#part2).
+    // Killing the trigger alone leaves that paused tween in place, and `progress(1)` doesn't reliably
+    // override it — so we kill the TWEEN itself, then hard-set the end state with gsap.set (a synchronous
+    // inline-style write nothing on the ticker can walk back).
     let revealed = false;
-    const timeouts: number[] = [];
-    const snap = () => {
+    const forceReveal = () => {
       if (revealed || !el) return;
       revealed = true;
       revealTween?.scrollTrigger?.kill();
-      revealTween?.progress(1);
-      staggerTweens.forEach((t) => { t.scrollTrigger?.kill(); t.progress(1); });
+      revealTween?.kill();
+      gsap.set(el, { opacity: 1, y: 0, clearProps: "transform,willChange" });
+      staggerTweens.forEach((t) => { t.scrollTrigger?.kill(); t.kill(); });
+      staggerGrids.forEach((grid) => gsap.set(grid.children, { opacity: 1, y: 0, clearProps: "transform,willChange" }));
     };
-    // Anchor landing (fresh #hash load OR an in-app nav-link click) → snap the LANDED section fully
-    // revealed instead of letting its `once` fade get caught mid-jump ("stuck faded"). The robust signal
-    // is IDENTITY, not timing: if this block is / contains / sits inside the element the hash points at,
-    // reveal it unconditionally (don't wait for the async scroll to arrive). Anything else already in view
-    // is snapped too; a few retries cover the browser's async scroll-to-anchor. No hash → untouched, so
-    // normal top-to-bottom scrolling still fades in.
+    // In view OR already scrolled past (top above the viewport bottom).
+    const inOrAboveView = () => el.getBoundingClientRect().top < window.innerHeight;
+
+    // Anchor landing (a fresh #hash load OR an in-app nav-link click): the browser jumps straight to a
+    // section, so its `once` fade freezes mid-jump. Reveal the landed section without waiting — identity
+    // match covers the exact target; the in/above-view check covers its siblings. A short time-boxed
+    // scroll listener catches the case where the browser's async scroll-to-anchor lands the block AFTER
+    // the retry timeouts fire. Outside that window normal top-to-bottom scrolling still fades in.
+    const timeouts: number[] = [];
+    let landingUntil = 0;
     const maybeSnap = () => {
+      if (revealed) return;
       const id = window.location.hash.slice(1);
-      if (!id) return;
-      const target = document.getElementById(id);
+      const target = id ? document.getElementById(id) : null;
       const isTarget = !!target && (el === target || el.contains(target) || target.contains(el));
-      const r = el.getBoundingClientRect();
-      if (isTarget || (r.top < window.innerHeight && r.bottom > 0)) snap();
+      if (isTarget || inOrAboveView()) forceReveal();
     };
-    const onLanding = () => { [0, 100, 260, 520].forEach((ms) => timeouts.push(window.setTimeout(maybeSnap, ms))); };
+    const onScroll = () => {
+      if (revealed) return;
+      if (performance.now() < landingUntil && inOrAboveView()) forceReveal();
+    };
+    const onLanding = () => {
+      landingUntil = performance.now() + 1200;
+      [0, 100, 260, 520, 900].forEach((ms) => timeouts.push(window.setTimeout(maybeSnap, ms)));
+    };
     const raf = requestAnimationFrame(() => requestAnimationFrame(() => { if (window.location.hash) onLanding(); }));
     const onHashChange = () => onLanding();
     window.addEventListener("hashchange", onHashChange);
+    window.addEventListener("scroll", onScroll, { passive: true });
+
+    // Universal safety net — the guarantee that no block is EVER left faded, on any entry path. After a
+    // grace window (longer than the 0.7s fade, and re-armed once images finish loading and reflow the
+    // page), any block that is in/above the viewport but still not fully opaque is force-revealed. Normal
+    // fades have completed by now, and below-the-fold blocks (top ≥ viewport bottom) are left to scroll.
+    const mountedAt = performance.now();
+    const NET_FLOOR_MS = 1400; // > the 0.7s fade, so a normal fade completes before the net could clip it
+    const safetyNet = () => {
+      if (revealed || !el) return;
+      if (inOrAboveView() && parseFloat(getComputedStyle(el).opacity || "1") < 0.99) forceReveal();
+    };
+    let netTimer = window.setTimeout(safetyNet, NET_FLOOR_MS);
+    // Re-check once images finish loading and reflow the page — but never earlier than the fade-safe
+    // floor, so a fast `load` can't cut a still-playing fade short.
+    const onLoad = () => {
+      window.clearTimeout(netTimer);
+      netTimer = window.setTimeout(safetyNet, Math.max(NET_FLOOR_MS - (performance.now() - mountedAt), 350));
+    };
+    window.addEventListener("load", onLoad);
+
     return () => {
       cancelAnimationFrame(raf);
       timeouts.forEach((t) => clearTimeout(t));
+      window.clearTimeout(netTimer);
       window.removeEventListener("hashchange", onHashChange);
+      window.removeEventListener("scroll", onScroll);
+      window.removeEventListener("load", onLoad);
       ctx.revert();
     };
   }, [reduce, y, delay]);
