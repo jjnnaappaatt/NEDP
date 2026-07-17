@@ -2,7 +2,7 @@ import "server-only";
 import { supabaseAdmin } from "@/lib/supabase/server";
 import { replyMessages, getProfile, manualHeroCard } from "./push";
 import { APP_URL, LIFF } from "./liff";
-import { matchCommand, isCancel, labelOf, type CommandKey } from "./fuzzy";
+import { matchCommand, isCancel, isExactCancel, labelOf, type CommandKey } from "./fuzzy";
 
 /**
  * Inbound LINE bot handler — ported from aai_mvp/app/monitor_routes.py `/line/webhook`. Text commands
@@ -183,11 +183,17 @@ async function handleCancel(db: Db, text: string, targetId: string, replyToken?:
 
 async function handleText(db: Db, text: string, targetId: string | null, replyToken?: string) {
   const t = (text || "").trim();
-  // issue-capture FSM: free text is captured; an exact command / cancel bails out and is processed normally
+  // issue-capture FSM: free text is captured as the issue; an EXACT command drops back to normal
+  // dispatch; a STANDALONE cancel word cancels the capture. A description that merely starts with a
+  // cancel word (e.g. "เลิกงานแล้วส่งข้อมูลไม่ได้") must still be captured — using prefix isCancel here
+  // both dropped the report and could unsubscribe the user. See AUDIT.md → LINE-cancel.
   if (targetId && (await isAwaiting(db, targetId))) {
     const [cmd, exact] = matchCommand(t);
-    if ((exact && cmd) || isCancel(t)) {
+    if (exact && cmd) {
+      await clearAwaiting(db, targetId); // fall through → dispatched as that command below
+    } else if (isExactCancel(t)) {
       await clearAwaiting(db, targetId);
+      return reply(replyToken, "ยกเลิกการแจ้งปัญหาแล้วค่ะ");
     } else {
       await clearAwaiting(db, targetId);
       if (await issueRateLimited(db, targetId)) {

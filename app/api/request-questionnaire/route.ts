@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import { requestQuestionnaire } from "@/lib/data";
+import { requestQuestionnaire, isProjectContact } from "@/lib/data";
 import { validateRawSurvey, type RawSurvey } from "@/lib/questionnaire/surveys";
 
 export const dynamic = "force-dynamic";
@@ -10,6 +10,9 @@ export async function POST(req: Request) {
   const b = (await req.json().catch(() => ({}))) as Record<string, unknown>;
   const projectId = String(b.projectId ?? "");
   if (!projectId) return NextResponse.json({ ok: false, error: "projectId required" }, { status: 400 });
+  // Only a project contact may request — otherwise anyone can spam the pending queue and push an
+  // attacker-titled Flex message to the project head. See AUDIT.md → AUTHZ-request.
+  if (!(await isProjectContact(projectId))) return NextResponse.json({ ok: false, error: "not_contact" }, { status: 403 });
 
   let payload: RawSurvey;
   try {

@@ -282,7 +282,10 @@ export async function approveQuestionnaireRequest(requestId: string, by = "admin
     { project_id?: string; title?: string; include_aai?: boolean; payload?: RawSurvey; status?: string } | null;
   if (!row || row.status !== "pending") return { ok: false, error: "not_found" };
   const title = String(row.title ?? "แบบสอบถามของโครงการ");
-  const code = `${codeSlug(title)}-${String(row.project_id ?? "").slice(0, 8)}`;
+  // Derive the code from the REQUEST id (unique per approval), not title+projectId — two same-project
+  // requests whose titles slugify equally would otherwise upsert the same (code, "v1.0") row and replace
+  // an in-use schema_json in place, corrupting historical q_answers. See AUDIT.md → Q-collision.
+  const code = `${codeSlug(title)}-${String(requestId).slice(0, 8)}`;
   const schema = surveyToSchema(row.payload as RawSurvey, { includeAai: row.include_aai !== false });
   const up = await upsertQuestionnaire(code, "v1.0", title, "survey", schema, by);
   if (!up.ok || !up.id) return { ok: false, error: up.error ?? "upsert failed" };

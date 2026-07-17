@@ -96,6 +96,18 @@ export async function getMyLocationSubmissions(
   return out;
 }
 
+/** Guard: every submitted locationId must belong to the gated project. The FK location_id→project_locations
+ *  only checks existence, not project match, so without this a contact of P could mint a submission row
+ *  carrying a location from project Q. See AUDIT.md → LOC-membership. */
+async function _locsInProject(
+  db: ReturnType<typeof supabaseAdmin>, projectId: string, locationIds: string[],
+): Promise<boolean> {
+  const ids = [...new Set(locationIds.filter(Boolean))];
+  if (ids.length === 0) return true;
+  const { data } = await db.from("project_locations").select("id").eq("project_id", projectId).in("id", ids);
+  return (data ?? []).length === ids.length;
+}
+
 /** Draft-save: persist partial monthly data (status 'draft', editable). Rejected if locked. */
 export async function saveDraftLocation(
   input: { projectId: string; locationId: string; values: Record<string, string> },
@@ -104,6 +116,7 @@ export async function saveDraftLocation(
   const me = await meId();
   if (!me) return { ok: false, error: "no_account" };
   if (!(await isProjectContact(input.projectId))) return { ok: false, error: "not_contact" };
+  if (!(await _locsInProject(db, input.projectId, [input.locationId]))) return { ok: false, error: "not_in_project" };
   if (await _isLocked(db, input.projectId, input.locationId, me, CURRENT_MONTH)) return { ok: false, error: "locked" };
   const now = new Date().toISOString();
   const { error } = await db.from("location_submissions").upsert(
@@ -127,6 +140,7 @@ export async function submitLocation(
   const me = await meId();
   if (!me) return { ok: false, error: "no_account" };
   if (!(await isProjectContact(input.projectId))) return { ok: false, error: "not_contact" };
+  if (!(await _locsInProject(db, input.projectId, [input.locationId]))) return { ok: false, error: "not_in_project" };
   if (await _isLocked(db, input.projectId, input.locationId, me, CURRENT_MONTH)) return { ok: false, error: "locked" };
   const now = new Date().toISOString();
   const { error } = await db.from("location_submissions").upsert(
@@ -167,6 +181,9 @@ export async function bulkSubmitLocations(
   const rows = (input.rows ?? []).filter((r) => r.locationId);
   if (rows.length === 0) return { ok: false, saved: 0, error: "no_rows" };
   const db = supabaseAdmin();
+  if (!(await _locsInProject(db, input.projectId, rows.map((r) => r.locationId)))) {
+    return { ok: false, saved: 0, error: "not_in_project" };
+  }
   const now = new Date().toISOString();
   const records = rows.map((r) => ({
     project_id: input.projectId, location_id: r.locationId, account_id: me,
@@ -182,13 +199,16 @@ export async function bulkSubmitLocations(
 /** Persist a project's location-list verification (who/when) — writes back to the bot's
  *  monitor_projects.location_verified_* so its location reminder stops. */
 export async function verifyLocations(
-  input: { projectId: string; verifiedBy: string },
+  input: { projectId: string; verifiedBy?: string },
 ): Promise<{ ok: boolean; error?: string }> {
   if (!(await isProjectContact(input.projectId))) return { ok: false, error: "not_contact" };
   const me = await meId(); // record WHO confirmed → drives the re-confirm cascade on unregister
   const db = supabaseAdmin();
+  // Derive the audit display-name server-side from the authenticated account — never trust a
+  // client-supplied verifiedBy for the "who" (that name is shown as authoritative). See AUDIT.md → ATTR-spoof.
+  const { data: acct } = await db.from("accounts").select("name").eq("id", me).maybeSingle();
   const { error } = await db.rpc("web_verify_locations", {
-    p_project: input.projectId, p_by: input.verifiedBy, p_account: me,
+    p_project: input.projectId, p_by: acct?.name ?? "", p_account: me,
   });
   return { ok: !error };
 }
@@ -204,8 +224,11 @@ export async function saveLocations(
 ): Promise<{ ok: boolean; blocked?: string[]; error?: string }> {
   if (!(await isProjectContact(input.projectId))) return { ok: false, error: "not_contact" };
   const db = supabaseAdmin();
+  // Derive the audit "who" server-side (ignore client-supplied editedBy). See AUDIT.md → ATTR-spoof.
+  const me = await meId();
+  const { data: acct } = await db.from("accounts").select("name").eq("id", me).maybeSingle();
   const { data, error } = await db.rpc("web_save_locations", {
-    p_project: input.projectId, locs: input.locations, p_by: input.editedBy ?? null,
+    p_project: input.projectId, locs: input.locations, p_by: acct?.name ?? null,
   });
   if (error) return { ok: false };
   const res = (data ?? {}) as { ok?: boolean; blocked?: string[] };

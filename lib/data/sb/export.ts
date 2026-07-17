@@ -95,32 +95,35 @@ export async function getRawExport(scope: ExportScope): Promise<RawExport> {
 
   const [{ data: projs }, persons, points, osm, subs, locs] = await Promise.all([
     db.from("projects").select("id,name").in("id", pids),
+    // Every paged query gets a unique `id` tiebreak: OFFSET pagination over a non-unique ORDER BY can
+    // silently drop or duplicate rows once a result set exceeds one page and a tie group straddles the
+    // boundary. See AUDIT.md → EXPORT-page (mirrors questionnaire.ts's existing id tiebreak).
     fetchAll<Rec>((a, b) =>
       db.from("persons").select("id,project_id,person_code,tambon_code,sex,age_band,enrolled_at")
-        .in("project_id", pids).order("person_code").range(a, b)),
+        .in("project_id", pids).order("person_code").order("id", { ascending: true }).range(a, b)),
     fetchAll<Rec>((a, b) => {
       let q = db.from("person_assessment_points")
-        .select("person_id,project_id,tambon_code,year_month,aai_d1,aai_d2,aai_d3,aai_d4,aai_overall,is_baseline,is_latest,status")
+        .select("person_id,project_id,tambon_code,year_month,aai_d1,aai_d2,aai_d3,aai_d4,aai_overall,is_baseline,is_latest,status,id")
         .in("project_id", pids);
       if (month) q = q.eq("year_month", month);
-      return q.order("year_month").range(a, b);
+      return q.order("year_month").order("id", { ascending: true }).range(a, b);
     }),
     fetchAll<Rec>((a, b) => {
       let q = db.from("tambon_osm_counts")
         .select("project_id,tambon_code,year_month,osm_before,osm_after").in("project_id", pids);
       if (month) q = q.eq("year_month", month);
-      return q.order("year_month").range(a, b);
+      return q.order("year_month").order("id", { ascending: true }).range(a, b);
     }),
     fetchAll<Rec>((a, b) => {
       let q = db.from("location_submissions")
         .select("project_id,location_id,year_month,data,submitted_at")
         .in("project_id", pids).eq("status", "submitted");
       if (month) q = q.eq("year_month", month);
-      return q.order("submitted_at", { ascending: false }).range(a, b);
+      return q.order("submitted_at", { ascending: false }).order("id", { ascending: true }).range(a, b);
     }),
     fetchAll<Rec>((a, b) =>
       db.from("project_locations").select("id,project_id,province,amphoe,tambon")
-        .in("project_id", pids).range(a, b)),
+        .in("project_id", pids).order("id", { ascending: true }).range(a, b)),
   ]);
 
   const projName = new Map((projs ?? []).map((p) => [String(p.id), String(p.name ?? "")]));
@@ -203,7 +206,7 @@ export async function getRawExport(scope: ExportScope): Promise<RawExport> {
   // export, two projects' distinct questionnaires — whose question ids are both S.q1, S.q2, … — never
   // collide into one column. Projects that share the SAME questionnaire correctly merge into one column.
   const qAnswerColMap = new Map<string, string>();       // "${qid}::${questionKey}" -> label
-  const scoreLabelMap: Record<string, string> = {};      // SC.* toolCode -> label (from schemas)
+  const scoreLabelMap: Record<string, string> = {};      // "${qid}::${toolCode}" -> label (from schemas)
   for (const pid of pids) {
     const qid = qidByProject.get(pid);
     const schema = qid ? schemaById.get(qid) : undefined;
@@ -211,7 +214,9 @@ export async function getRawExport(scope: ExportScope): Promise<RawExport> {
     for (const c of schemaToColumns(schema, modulesByProject.get(pid) ?? [])) {
       if (c.kind === "question") qAnswerColMap.set(`${qid}::${c.key}`, c.th);
     }
-    Object.assign(scoreLabelMap, surveyScoreLabels(schema));
+    // Namespace survey-score labels by questionnaire_id too, so two projects reusing the same bare score
+    // key (e.g. "stress") don't overwrite each other's column header. See AUDIT.md → EXPORT-label.
+    for (const [k, v] of Object.entries(surveyScoreLabels(schema))) scoreLabelMap[`${qid}::${k}`] = v;
   }
   const qAnswerCols: ColLabel[] = [...qAnswerColMap].map(([key, th]) => ({ key, th }));
 
@@ -248,7 +253,7 @@ export async function getRawExport(scope: ExportScope): Promise<RawExport> {
       for (const [code, raw] of Object.entries(sc)) {
         const colKey = `${qid}::${code}`;
         scores[colKey] = raw;
-        if (!scoreColMap.has(colKey)) scoreColMap.set(colKey, TOOL_LABEL[code] ?? scoreLabelMap[code] ?? code);
+        if (!scoreColMap.has(colKey)) scoreColMap.set(colKey, TOOL_LABEL[code] ?? scoreLabelMap[colKey] ?? code);
       }
       qScores.push({ ...base, scores });
     }

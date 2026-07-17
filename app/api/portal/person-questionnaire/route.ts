@@ -11,6 +11,6 @@ export async function GET(req: Request) {
   const personId = url.searchParams.get("personId") ?? "";
   if (!projectId || !personId) return NextResponse.json({ error: "params" }, { status: 400 });
   if (!(await isProjectContact(projectId))) return NextResponse.json({ error: "not_contact" }, { status: 403 });
-  const [assigned, prefill] = await Promise.all([getAssignedQuestionnaire(projectId), getPersonPrefill(personId)]);
+  const [assigned, prefill] = await Promise.all([getAssignedQuestionnaire(projectId), getPersonPrefill(personId, projectId)]);
   return NextResponse.json({ assigned, prefill });
 }

@@ -364,8 +364,8 @@ export async function getAssignedQuestionnaire(projectId: string): Promise<sb.As
 export async function getAssignedQuestionnaireInfo(projectId: string): Promise<{ title: string } | null> {
   return USE_SUPABASE ? sb.getAssignedQuestionnaireInfo(projectId) : null;
 }
-export async function getPersonPrefill(personId: string) {
-  return USE_SUPABASE ? sb.getPersonPrefill(personId) : null;
+export async function getPersonPrefill(personId: string, projectId: string) {
+  return USE_SUPABASE ? sb.getPersonPrefill(personId, projectId) : null;
 }
 export async function getPersonPreAnswers(personId: string) {
   return USE_SUPABASE ? sb.getPersonPreAnswers(personId) : null;
@@ -441,6 +441,9 @@ export async function sendSiteVisit(id: number) {
 export type { PersonDetail, PersonAssessmentPoint } from "./supabase";
 export async function getPersonDetail(personId: string): Promise<sb.PersonDetail | null> {
   return USE_SUPABASE ? sb.getPersonDetail(personId) : null;
+}
+export async function getPersonProjectId(personId: string): Promise<string | null> {
+  return USE_SUPABASE ? sb.getPersonProjectId(personId) : null;
 }
 export type { ProjectAreaTree, ProjectAreaNode, AreaStatus } from "./supabase";
 export async function getProjectAreaTree(projectId: string): Promise<sb.ProjectAreaTree> {

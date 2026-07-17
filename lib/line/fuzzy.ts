@@ -36,6 +36,14 @@ export function isCancel(text: string): boolean {
   return CANCEL_PREFIXES.some((p) => n.startsWith(normalize(p)));
 }
 
+/** True only when the text IS a cancel word on its own (not merely starts with one) — lets the
+ *  issue-capture FSM tell a standalone "cancel" intent apart from a free-text problem description that
+ *  happens to begin with a cancel word (e.g. "เลิกงานแล้วส่งข้อมูลไม่ได้"). See AUDIT.md → LINE-cancel. */
+export function isExactCancel(text: string): boolean {
+  const n = normalize(text);
+  return CANCEL_PREFIXES.some((p) => n === normalize(p));
+}
+
 /** difflib.SequenceMatcher.ratio() equivalent (gestalt matching), sufficient for short command strings. */
 function seqRatio(a: string, b: string): number {
   const matches = (x: string, y: string): number => {

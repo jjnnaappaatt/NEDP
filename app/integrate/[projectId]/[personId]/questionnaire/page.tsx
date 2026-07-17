@@ -11,7 +11,7 @@ export const dynamic = "force-dynamic";
 export default async function PersonQuestionnairePage({ params }: { params: Promise<{ projectId: string; personId: string }> }) {
   const { projectId, personId } = await params;
   const [project, canEdit, assigned, prefill, history] = await Promise.all([
-    getProject(projectId), isProjectContact(projectId), getAssignedQuestionnaire(projectId), getPersonPrefill(personId),
+    getProject(projectId), isProjectContact(projectId), getAssignedQuestionnaire(projectId), getPersonPrefill(personId, projectId),
     getPersonClinicalAssessments(personId),
   ]);
   if (!project || !prefill) notFound();

@@ -56,7 +56,11 @@ export async function submitClinicalAssessment(input: {
   const db = supabaseAdmin();
   const me = await meId();
   if (!me) return { ok: false, error: "no_account" };
-  if (!(await isProjectContact(input.projectId))) return { ok: false, error: "not_contact" };
+  // Authorize against the PERSON's real project, not the caller-supplied projectId (IDOR guard):
+  // assess_person_clinical keys on person_id only. See AUDIT.md → IDOR-assess.
+  const { data: prow } = await db.from("persons").select("project_id").eq("id", input.personId).maybeSingle();
+  if (!prow) return { ok: false, error: "not_found" };
+  if (!(await isProjectContact(String(prow.project_id)))) return { ok: false, error: "not_contact" };
   const { data, error } = await db.rpc("assess_person_clinical", {
     p_person_id: input.personId, p_round: input.round || "pre", p_year_month: input.yearMonth ?? CURRENT_MONTH,
     p_questionnaire_id: input.questionnaireId, p_q_answers: input.qAnswers,
@@ -125,10 +129,12 @@ export async function bulkEnrollAssessClinical(input: {
   return { ok: failed.length === 0, enrolled, assessed, failed };
 }
 
-/** Prefill fields for the questionnaire form (from the person row). */
-export async function getPersonPrefill(personId: string): Promise<{ personCode: string; sex: string | null; education: number | null; occupation: number | null; tambonCode: string | null } | null> {
+/** Prefill fields for the questionnaire form (from the person row). Scoped to `projectId` so a contact
+ *  of one project can't read a person from another project via the prefill (IDOR-prefill in AUDIT.md);
+ *  the query returns null when the person doesn't belong to the gated project. */
+export async function getPersonPrefill(personId: string, projectId: string): Promise<{ personCode: string; sex: string | null; education: number | null; occupation: number | null; tambonCode: string | null } | null> {
   const db = supabaseAdmin();
-  const { data } = await db.from("persons").select("person_code,sex,education_level,occupation_code,tambon_code").eq("id", personId).maybeSingle();
+  const { data } = await db.from("persons").select("person_code,sex,education_level,occupation_code,tambon_code").eq("id", personId).eq("project_id", projectId).maybeSingle();
   if (!data) return null;
   return {
     personCode: String(data.person_code ?? ""), sex: data.sex == null ? null : String(data.sex),

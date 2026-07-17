@@ -244,7 +244,12 @@ export async function submitPersonAssessment(input: {
   const db = supabaseAdmin();
   const me = await meId();
   if (!me) return { ok: false, error: "no_account" };
-  if (!(await isProjectContact(input.projectId))) return { ok: false, error: "not_contact" };
+  // Authorize against the PERSON's real project, not the caller-supplied projectId (IDOR guard):
+  // assess_person_manual keys on person_id only, so trusting input.projectId would let a contact of
+  // project A overwrite a person enrolled in project B. See AUDIT.md → IDOR-assess.
+  const { data: prow } = await db.from("persons").select("project_id").eq("id", input.personId).maybeSingle();
+  if (!prow) return { ok: false, error: "not_found" };
+  if (!(await isProjectContact(String(prow.project_id)))) return { ok: false, error: "not_contact" };
   // AAI domains are pre-normalized 0–100; reject out-of-range before the RPC (null/undefined = not scored).
   const inRange = (v: number | null | undefined) =>
     v === null || v === undefined || (Number.isFinite(v) && v >= 0 && v <= 100);
@@ -456,6 +461,14 @@ export type PersonDetail = {
   fullName: string | null; sex: string | null; ageBand: string | null;
   assessments: PersonAssessmentPoint[];
 };
+
+/** The project a person belongs to, WITHOUT decrypting/logging the name — for authorizing before any
+ *  name-decrypting read (see MED-3 in AUDIT.md: person-detail must gate before getPersonName runs). */
+export async function getPersonProjectId(personId: string): Promise<string | null> {
+  const db = supabaseAdmin();
+  const { data } = await db.from("persons").select("project_id").eq("id", personId).maybeSingle();
+  return data?.project_id ? String(data.project_id) : null;
+}
 
 /** Full detail for one person: identity (name decrypted + logged), tambon, and their assessment timeline. */
 export async function getPersonDetail(personId: string): Promise<PersonDetail | null> {

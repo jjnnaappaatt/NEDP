@@ -25,8 +25,10 @@ export const getMe = cache(async function getMe(): Promise<Account> {
     const { data } = await db.from("accounts").select(ACCOUNT_COLS).eq("id", id).maybeSingle();
     if (data) return { ...toAccount(data), isMe: true };
   }
-  const { data } = await db.from("accounts").select(ACCOUNT_COLS).order("name").limit(1).maybeSingle();
-  return data ? { ...toAccount(data), isMe: true } : { id: "", name: "ผู้เยี่ยมชม", avatarColor: "#1a56db", isMe: true };
+  // Not logged in → a neutral guest identity. Never fall back to a real account: the old
+  // first-by-name fallback leaked a real staff account (name/org/avatar) as "me" to anonymous
+  // visitors — the display-side sibling of CRIT-2 in AUDIT.md.
+  return { id: "", name: "ผู้เยี่ยมชม", avatarColor: "#1a56db", isMe: true };
 });
 
 export async function getAccounts(): Promise<Account[]> {

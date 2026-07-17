@@ -60,9 +60,18 @@ export default async function ExecTambonPage() {
                     <div className="mt-0.5 truncate text-xs text-ink-muted">{t.province_th} · {t.amphoe_th}</div>
                   </div>
                   <div className="whitespace-nowrap text-right text-xs text-ink-muted">
-                    <div>{t.n_pre}{t.n_post != null ? ` → ${t.n_post}` : ""} คน</div>
-                    {t.n_flag_pre != null && t.n_flag_pre > 0 && (
-                      <div className="mt-0.5 font-medium text-danger-fg">⚠ ต้องส่งต่อ {t.n_flag_pre}</div>
+                    {suppressed ? (
+                      // < 5 people: show only a coarse count, never the exact head/flag counts — a
+                      // suppressed tambon with n=3, flag=3 would otherwise disclose all three are
+                      // clinically flagged on this PUBLIC page. See AUDIT.md → MED-2.
+                      <div>&lt; 5 คน</div>
+                    ) : (
+                      <>
+                        <div>{t.n_pre}{t.n_post != null ? ` → ${t.n_post}` : ""} คน</div>
+                        {t.n_flag_pre != null && t.n_flag_pre > 0 && (
+                          <div className="mt-0.5 font-medium text-danger-fg">⚠ ต้องส่งต่อ {t.n_flag_pre}</div>
+                        )}
+                      </>
                     )}
                   </div>
                 </div>

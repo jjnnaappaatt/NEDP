@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import { requestIntegration } from "@/lib/data";
+import { requestIntegration, isProjectContact } from "@/lib/data";
 
 export const dynamic = "force-dynamic";
 
@@ -14,6 +14,9 @@ export async function POST(req: Request) {
   }
   const { projectId, note } = body ?? {};
   if (!projectId) return NextResponse.json({ error: "projectId required" }, { status: 400 });
+  // Only a project contact may request — without this, anyone could spam the pending queue for every
+  // project (the "one open request" index then blocks legitimate onboarding). See AUDIT.md → AUTHZ-request.
+  if (!(await isProjectContact(projectId))) return NextResponse.json({ error: "not_contact" }, { status: 403 });
   const r = await requestIntegration(projectId, note);
   return NextResponse.json(r, { status: r.ok ? 200 : 400 });
 }
