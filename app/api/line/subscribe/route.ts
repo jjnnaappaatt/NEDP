@@ -31,7 +31,11 @@ export async function POST(req: Request) {
   }
 
   // 1) Token must belong to our LINE Login channel; userId is trustworthy only after this verify.
+  //    Fail CLOSED: a missing channel config is a hard error, never a skipped check.
   const channelId = process.env.LINE_LOGIN_CHANNEL_ID;
+  if (!channelId) {
+    return NextResponse.json({ ok: false, error: "LINE channel not configured" }, { status: 500 });
+  }
   const verifyRes = await fetch(
     `https://api.line.me/oauth2/v2.1/verify?access_token=${encodeURIComponent(accessToken)}`,
   );
@@ -39,7 +43,7 @@ export async function POST(req: Request) {
     return NextResponse.json({ ok: false, error: "invalid LINE token" }, { status: 401 });
   }
   const verify = (await verifyRes.json()) as { client_id?: string };
-  if (channelId && verify.client_id !== channelId) {
+  if (verify.client_id !== channelId) {
     return NextResponse.json({ ok: false, error: "token channel mismatch" }, { status: 401 });
   }
   const profRes = await fetch("https://api.line.me/v2/profile", {
