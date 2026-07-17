@@ -10,13 +10,15 @@ import { cookies } from "next/headers";
 import { supabaseAdmin } from "@/lib/supabase/server";
 import { CURRENT_MONTH, monthLabelThai } from "@/lib/format";
 import { statusLabelOf } from "@/lib/forms/monthlyReport";
+import { ACCOUNT_COOKIE, verifyAccountToken } from "@/lib/account-auth";
 import type { Account, Project } from "@/types";
 
-/** The signed-in LINE user's account id (cookie set by /api/line/link); null when not logged in. */
+/** The signed-in LINE user's account id (cookie set by /api/line/link); null when not logged in.
+ *  The cookie is an HMAC-signed token — a forged or plaintext value fails verification and yields null. */
 export async function currentAccountId(): Promise<string | null> {
   try {
     const c = await cookies();
-    return c.get("nedp_account")?.value ?? null;
+    return await verifyAccountToken(c.get(ACCOUNT_COOKIE)?.value);
   } catch {
     return null;
   }
@@ -51,13 +53,11 @@ export function withProjectAvatar(account: Account, project: Project, aMap: Map<
 
 // cache() is per-REQUEST in Next.js (reset each request via AsyncLocalStorage), so this dedupes the
 // many meId() calls within one render (layout + page + data fns) without leaking identity across users.
+// No cookie → "" (anonymous). Callers already treat empty me as unauthenticated (isProjectContact
+// returns false; read fns guard `if (!me) return []`). The old first-account fallback made anonymous
+// requests act as a real user — see CRIT-2 in AUDIT.md.
 export const meId = cache(async function meId(): Promise<string> {
-  const id = await currentAccountId();
-  if (id) return id;
-  // Not logged in → fall back to the first account so the app still renders (no "me" highlight).
-  const db = supabaseAdmin();
-  const { data } = await db.from("accounts").select("id").order("name").limit(1).maybeSingle();
-  return data?.id ?? "";
+  return (await currentAccountId()) ?? "";
 });
 
 /** Contact-info gate: true once the account has a phone on file. */

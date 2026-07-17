@@ -5,7 +5,7 @@ import {
   locationVerifications, monthlyRankings, follows, templateFor, ME_ID,
 } from "@/lib/mock/data";
 import { pointEventsForSubmission } from "@/lib/points";
-import { denyOnVercel } from "@/lib/devGuard";
+import { denyInProd } from "@/lib/devGuard";
 
 /**
  * Dev-only seed: populate Supabase from the Phase-1 mock (lib/mock). Mock string ids ("p1","a1")
@@ -13,7 +13,7 @@ import { denyOnVercel } from "@/lib/devGuard";
  * DB reproduces the leaderboard. Idempotent: deletes all rows first. Trigger: GET /api/seed?confirm=1
  */
 export async function GET(req: Request) {
-  const denied = denyOnVercel();
+  const denied = denyInProd();
   if (denied) return denied;
   if (new URL(req.url).searchParams.get("confirm") !== "1") {
     return NextResponse.json({ error: "add ?confirm=1 to seed" }, { status: 400 });

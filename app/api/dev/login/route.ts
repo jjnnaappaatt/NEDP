@@ -1,15 +1,16 @@
 import { NextResponse } from "next/server";
 import { createClient } from "@supabase/supabase-js";
-import { denyOnVercel } from "@/lib/devGuard";
+import { denyInProd } from "@/lib/devGuard";
+import { ACCOUNT_COOKIE, ACCOUNT_COOKIE_OPTS, signAccountToken } from "@/lib/account-auth";
 
 /**
  * Dev-only login for local E2E: GET /api/dev/login?name=<exact account name>[&head=<projectUuid>]
- * (or ?accountId=<uuid>). Sets the same `nedp_account` httpOnly cookie as /api/line/link, ensures the
+ * (or ?accountId=<uuid>). Sets the same `nedp_account` session cookie as /api/line/link, ensures the
  * account has a phone (so isProjectContact() passes), and can optionally make it the project head so
- * the chief-only activity feed is testable without the admin console. NEVER runs on Vercel.
+ * the chief-only activity feed is testable without the admin console. NEVER runs in production.
  */
 export async function GET(req: Request) {
-  const denied = denyOnVercel();
+  const denied = denyInProd();
   if (denied) return denied;
   const url = process.env.NEXT_PUBLIC_SUPABASE_URL;
   const key = process.env.SUPABASE_SERVICE_ROLE_KEY;
@@ -33,8 +34,6 @@ export async function GET(req: Request) {
   if (head) await db.from("projects").update({ head_account_id: acct.id }).eq("id", head);
 
   const res = NextResponse.json({ ok: true, accountId: acct.id, name: acct.name, head: head ?? null });
-  res.cookies.set("nedp_account", acct.id, {
-    httpOnly: true, sameSite: "lax", path: "/", maxAge: 60 * 60 * 24 * 180,
-  });
+  res.cookies.set(ACCOUNT_COOKIE, await signAccountToken(acct.id), ACCOUNT_COOKIE_OPTS);
   return res;
 }

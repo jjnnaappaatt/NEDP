@@ -1,5 +1,6 @@
 import { NextResponse, after } from "next/server";
 import { supabaseAdmin } from "@/lib/supabase/server";
+import { ACCOUNT_COOKIE, ACCOUNT_COOKIE_OPTS, signAccountToken } from "@/lib/account-auth";
 
 export const dynamic = "force-dynamic";
 
@@ -109,9 +110,7 @@ export async function POST(req: Request) {
     },
   });
   if (acct) {
-    res.cookies.set("nedp_account", acct.id, {
-      httpOnly: true, sameSite: "lax", path: "/", maxAge: 60 * 60 * 24 * 180,
-    });
+    res.cookies.set(ACCOUNT_COOKIE, await signAccountToken(acct.id), ACCOUNT_COOKIE_OPTS);
   }
   return res;
 }

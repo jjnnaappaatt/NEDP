@@ -1,10 +1,10 @@
 import { NextResponse } from "next/server";
 import { createClient } from "@supabase/supabase-js";
-import { denyOnVercel } from "@/lib/devGuard";
+import { denyInProd } from "@/lib/devGuard";
 
 /** Dev check: confirm seeded counts + that issue reports persisted. */
 export async function GET() {
-  const denied = denyOnVercel();
+  const denied = denyInProd();
   if (denied) return denied;
   const url = process.env.NEXT_PUBLIC_SUPABASE_URL!;
   const key = process.env.SUPABASE_SERVICE_ROLE_KEY!;
