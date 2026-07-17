@@ -4,6 +4,8 @@
 
 > Extracted from a production system serving real screening projects. This repo ships the full app — routes, scoring logic, LINE integration, exports — with sample/demo data. No real personal data, and no secrets, are included; see [Security notes](#security-notes).
 
+**🔗 Live demo:** [nedp-showcase.vercel.app](https://nedp-showcase.vercel.app) · [/manual guide](https://nedp-showcase.vercel.app/manual) — a separate deployment of this repo, running on its own built-in mock data with no real backend behind it.
+
 Projects across Thailand each run their own elderly-screening questionnaire (fall risk, bone density, nutrition, or a fully custom survey). NEDP standardizes the output into one comparable score — the **Active Ageing Index (AAI)** and its 4 domains — while letting every project keep its own instrument and its own dashboard.
 
 ---
