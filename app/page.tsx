@@ -26,5 +26,19 @@ export default async function Home({
 }) {
   const sp = await searchParams;
   const target = safeInternalPath(sp["liff.state"]) ?? safeInternalPath(sp["to"]);
-  redirect(target && target !== "/" ? target : "/dashboard");
+  const dest = target && target !== "/" ? target : "/dashboard";
+  // A LINE Login (web/desktop) return lands here as `/?liff.state=%2F<path>&code=…&state=…`: LINE
+  // appends the OAuth `code`/`state` to the LIFF Endpoint URL (this root). Forward every param EXCEPT
+  // the deep-link keys we just consumed, so the code reaches the target page where the client `liff.init()`
+  // exchanges it for a session. A bare `redirect(dest)` drops the code → `isLoggedIn()` stays false →
+  // no account cookie → the login loops back as guest. (In-LINE opens don't carry a code, so this is inert
+  // for them.)
+  const passthrough = new URLSearchParams();
+  for (const [k, v] of Object.entries(sp)) {
+    if (k === "liff.state" || k === "to") continue;
+    const val = Array.isArray(v) ? v[0] : v;
+    if (typeof val === "string") passthrough.set(k, val);
+  }
+  const qs = passthrough.toString();
+  redirect(qs ? `${dest}?${qs}` : dest);
 }
