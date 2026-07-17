@@ -4,7 +4,7 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { Card } from "@/components/ui/Card";
 import { cn } from "@/lib/utils";
-import { IconPlus, IconChevronDown, IconTrash, IconCheck, IconX, IconUserPlus, IconDatabaseImport, IconClipboardList } from "@tabler/icons-react";
+import { IconPlus, IconChevronDown, IconTrash, IconCheck, IconX, IconUserPlus, IconDatabaseImport, IconClipboardList, IconLink, IconCopy } from "@tabler/icons-react";
 import type { AdminProject, HeadRequest, IntegrationRequest, QuestionnaireInfo, ProjectQuestionnaire, QuestionnaireRequest } from "@/lib/data";
 
 const MODULE_OPTS = [{ key: "fall", label: "หกล้ม" }, { key: "bmd", label: "กระดูก (BMD)" }, { key: "nutrition", label: "โภชนาการ" }];
@@ -12,7 +12,7 @@ const MODULE_OPTS = [{ key: "fall", label: "หกล้ม" }, { key: "bmd", la
 const fieldCls = "w-full rounded-card border border-border bg-surface px-3 py-2 text-sm text-ink outline-none focus:border-accent";
 const btn = "inline-flex items-center justify-center gap-1.5 rounded-card px-3 py-2 text-sm font-medium transition disabled:opacity-50";
 
-async function postProjects(body: unknown): Promise<{ ok: boolean; error?: string }> {
+async function postProjects(body: unknown): Promise<{ ok: boolean; error?: string; url?: string; accountName?: string }> {
   const res = await fetch("/api/admin/projects", {
     method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(body),
   });
@@ -127,6 +127,20 @@ function ProjectCard({ p, open, onToggle, onChanged, headRequests, integrationRe
   const [confirm, setConfirm] = useState("");
   const [busy, setBusy] = useState(false);
   const [err, setErr] = useState<string | null>(null);
+  const [claimLink, setClaimLink] = useState<string | null>(null);
+  const [copied, setCopied] = useState(false);
+
+  async function makeClaimLink() {
+    setBusy(true); setErr(null); setCopied(false);
+    const r = await postProjects({ action: "claim-link", sourcePid: p.pid });
+    setBusy(false);
+    if (r.ok && r.url) setClaimLink(r.url);
+    else setErr(r.error ?? "สร้างลิงก์ไม่สำเร็จ");
+  }
+  async function copyClaimLink() {
+    if (!claimLink) return;
+    try { await navigator.clipboard.writeText(claimLink); setCopied(true); } catch { /* ignore */ }
+  }
 
   async function expand() {
     onToggle();
@@ -228,6 +242,24 @@ function ProjectCard({ p, open, onToggle, onChanged, headRequests, integrationRe
                 </div>
               </>
             )}
+            {/* Claim link — invite the researcher to bind their LINE to this project's placeholder account */}
+            <div className="space-y-1.5 border-t border-border/60 pt-2.5">
+              <div className="flex flex-wrap items-center justify-between gap-2">
+                <div className="text-xs font-medium text-ink-soft">เชื่อมบัญชีนักวิจัยกับ LINE</div>
+                <button disabled={busy} onClick={makeClaimLink} className={cn(btn, "border border-border text-ink-soft hover:bg-surface-soft")}>
+                  <IconLink size={13} className="mr-1 inline" /> สร้างลิงก์เชื่อม
+                </button>
+              </div>
+              {claimLink && (
+                <div className="flex items-center gap-1.5 rounded-card border border-border bg-surface-soft p-1.5">
+                  <input readOnly value={claimLink} onFocus={(e) => e.currentTarget.select()} className="min-w-0 flex-1 bg-transparent px-1 text-xs text-ink-soft outline-none" />
+                  <button onClick={copyClaimLink} className="inline-flex shrink-0 items-center gap-1 rounded-card bg-hero px-2 py-1 text-xs font-medium text-[var(--on-primary)]">
+                    {copied ? <><IconCheck size={12} /> คัดลอกแล้ว</> : <><IconCopy size={12} /> คัดลอก</>}
+                  </button>
+                </div>
+              )}
+              <p className="text-[11px] text-ink-muted">ส่งลิงก์ให้นักวิจัยเปิดและเข้าสู่ระบบด้วย LINE เพื่อรับบัญชีโครงการ (ชื่อ/หน่วยงาน/การลงทะเบียนเดิม)</p>
+            </div>
           </div>
 
           {/* Questionnaire assignment */}

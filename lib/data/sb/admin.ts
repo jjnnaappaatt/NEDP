@@ -7,6 +7,7 @@ import "server-only";
 import { supabaseAdmin } from "@/lib/supabase/server";
 import { pushMessages, statusFlex } from "@/lib/line/push";
 import { LIFF } from "@/lib/line/liff";
+import { signClaimToken } from "@/lib/claim-auth";
 import type { IssueReport } from "@/types";
 import { QUESTIONNAIRE_REGISTRY } from "@/lib/questionnaire/registry";
 import { surveyToSchema, type RawSurvey } from "@/lib/questionnaire/surveys";
@@ -174,6 +175,32 @@ export async function setProjectHead(sourcePid: number, accountId: string | null
   const db = supabaseAdmin();
   const { error } = await db.rpc("web_set_project_head", { p_source_project_id: sourcePid, p_account: accountId, p_by: by });
   return { ok: !error, error: error?.message };
+}
+
+/**
+ * Mint an admin-vouched LINE-claim link for a project's seeded researcher (placeholder) account — the
+ * one with the researcher's name/org/phone + registration but no line_user_id yet. The researcher opens
+ * the link, logs in with LINE, and /api/claim binds their identity to that account (see
+ * web_claim_project_account). Returns a LIFF URL (opens in-LINE) that falls back to the web app.
+ */
+export async function mintProjectClaimLink(
+  sourcePid: number,
+): Promise<{ ok: boolean; url?: string; accountName?: string; error?: string }> {
+  const db = supabaseAdmin();
+  const { data: acct } = await db
+    .from("accounts")
+    .select("id,name")
+    .eq("source_project_id", sourcePid)
+    .eq("source_kind", "project")
+    .is("line_user_id", null)
+    .order("id", { ascending: true })
+    .limit(1)
+    .maybeSingle();
+  if (!acct) {
+    return { ok: false, error: "ไม่พบบัญชีนักวิจัยที่ยังไม่ได้เชื่อม LINE ของโครงการนี้ (อาจเชื่อมแล้ว)" };
+  }
+  const token = await signClaimToken(acct.id as string);
+  return { ok: true, url: LIFF(`/claim?token=${encodeURIComponent(token)}`), accountName: (acct.name as string) ?? "" };
 }
 
 export type HeadRequest = {

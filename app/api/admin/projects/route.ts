@@ -2,7 +2,7 @@ import { NextResponse } from "next/server";
 import { getAdminSession } from "@/lib/admin-auth";
 import {
   createMonitorProject, updateMonitorProject, deleteMonitorProject, setProjectAvatar, setProjectHead,
-  assignQuestionnaire, unassignQuestionnaire,
+  assignQuestionnaire, unassignQuestionnaire, mintProjectClaimLink,
 } from "@/lib/data";
 
 /** Admin project management. POST { action: create|update|delete|avatar|head, ... }. Admin-gated. */
@@ -26,6 +26,8 @@ export async function POST(req: Request) {
       return NextResponse.json(await setProjectAvatar(Number(b.sourcePid), (b.accountId as string) ?? null));
     case "head":
       return NextResponse.json(await setProjectHead(Number(b.sourcePid), (b.accountId as string) ?? null));
+    case "claim-link":
+      return NextResponse.json(await mintProjectClaimLink(Number(b.sourcePid)));
     case "assign-questionnaire":
       return NextResponse.json(await assignQuestionnaire(
         String(b.projectId ?? ""), String(b.questionnaireId ?? ""),

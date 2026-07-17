@@ -141,7 +141,7 @@ export async function getDashboardSummary(month = CURRENT_MONTH): Promise<Dashbo
     await Promise.all([
       getLeaderboard(month), getMyProjects(month), getFollowingIds(),
       db.from("projects").select("*", { count: "exact", head: true }),
-      db.from("accounts").select("*", { count: "exact", head: true }),
+      db.from("accounts").select("*", { count: "exact", head: true }).not("line_user_id", "is", null), // real (LINE-linked) users — not seeded placeholders
       db.from("location_submissions").select("*", { count: "exact", head: true }).eq("year_month", month).eq("status", "submitted"),
     ]);
   const mineStandings = standings.filter((s) => s.isMe);
@@ -199,7 +199,7 @@ export async function getOrgDashboardSummary(month = CURRENT_MONTH): Promise<Org
   const db = supabaseAdmin();
   const [all, { count: totalAccounts }, { count: submittedLocations }] = await Promise.all([
     getAllProjectStatuses(month),
-    db.from("accounts").select("*", { count: "exact", head: true }),
+    db.from("accounts").select("*", { count: "exact", head: true }).not("line_user_id", "is", null), // real (LINE-linked) users — not seeded placeholders
     db.from("location_submissions").select("*", { count: "exact", head: true }).eq("year_month", month).eq("status", "submitted"),
   ]);
   const projectCount = all.length;

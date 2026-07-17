@@ -301,6 +301,9 @@ export async function setProjectAvatar(sourcePid: number, accountId: string | nu
 export async function setProjectHead(sourcePid: number, accountId: string | null, by?: string) {
   return USE_SUPABASE ? sb.setProjectHead(sourcePid, accountId, by) : MOCK_FAIL;
 }
+export async function mintProjectClaimLink(sourcePid: number) {
+  return USE_SUPABASE ? sb.mintProjectClaimLink(sourcePid) : MOCK_FAIL;
+}
 export async function getHeadRequests(): Promise<sb.HeadRequest[]> {
   return USE_SUPABASE ? sb.getHeadRequests() : [];
 }
