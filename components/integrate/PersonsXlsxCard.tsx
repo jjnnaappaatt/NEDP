@@ -2,20 +2,13 @@
 
 import { useRef, useState } from "react";
 import { IconDownload, IconUpload, IconFileSpreadsheet, IconAlertTriangle } from "@tabler/icons-react";
+import { errMsg } from "@/components/xlsx/errors";
 
 type Report = {
   ok: boolean; total: number; valid: number; willEnroll: number; willAssess: number;
   invalid: number; unmatched: number; ambiguous: number; blankSkipped: number; truncated: boolean;
   piiWarning: boolean; sample: { rowNo: number; code: string; tambon: string; action: string; errors: string[] }[];
 };
-
-const errMsg = (e?: string) =>
-  e === "not_contact" ? "ต้องเป็นผู้รับผิดชอบโครงการ"
-    : e === "not_enabled" ? "ยังไม่ได้เปิดใช้งานการนำเข้าข้อมูลรายบุคคล"
-      : e === "missing_columns" ? "ไฟล์ไม่มีคอลัมน์ จังหวัด/อำเภอ/ตำบล"
-        : e === "empty" ? "ไฟล์ว่าง"
-          : e === "no_match" ? "ไม่พบพื้นที่ที่ตรงกับโครงการ"
-            : "อัปโหลดไม่สำเร็จ";
 
 /** Bulk per-person intake: download the template → upload to PREVIEW (dry-run report) → confirm to commit.
  *  A preview step is required because rows carry real names (PDPA) and enroll people irreversibly. */

@@ -2,6 +2,8 @@
 
 import { useRef, useState } from "react";
 import { IconDownload, IconUpload, IconMapPin } from "@tabler/icons-react";
+import { useXlsxUpload } from "@/components/xlsx/useXlsxUpload";
+import { errMsg } from "@/components/xlsx/errors";
 
 /** Bulk-edit the project's รายชื่อพื้นที่ via Excel (สถานะ/จัดการ portal): download the location list,
  *  edit offline, upload → replace (FK-safe; web_save_locations keeps monitor_project_areas in sync). */
@@ -11,24 +13,17 @@ export function LocationXlsxCard({ projectId, canEdit, meName }: {
   meName: string;
 }) {
   const fileRef = useRef<HTMLInputElement>(null);
-  const [busy, setBusy] = useState(false);
   const [msg, setMsg] = useState<string | null>(null);
+  const { busy, upload: post } = useXlsxUpload({ endpoint: "/api/upload-locations", projectId, meName });
 
   const upload = async (file: File) => {
-    setBusy(true); setMsg(null);
-    try {
-      const fd = new FormData();
-      fd.append("file", file);
-      fd.append("projectId", projectId);
-      fd.append("editedBy", meName);
-      const res = await fetch("/api/upload-locations", { method: "POST", body: fd });
-      const d = (await res.json().catch(() => ({}))) as { ok?: boolean; blocked?: string[]; error?: string };
-      if (res.ok && d.ok) {
-        const blocked = d.blocked ?? [];
-        setMsg(`บันทึกพื้นที่แล้ว ✓${blocked.length ? ` (ลบไม่ได้: ${blocked.join(", ")})` : ""}`);
-        setTimeout(() => window.location.reload(), 1200);
-      } else setMsg(d.error === "not_contact" ? "ต้องลงทะเบียนเป็นผู้ติดต่อก่อน" : "อัปโหลดไม่สำเร็จ");
-    } finally { setBusy(false); }
+    setMsg(null);
+    const { ok, data: d } = await post(file);
+    if (ok) {
+      const blocked = (d.blocked as string[] | undefined) ?? [];
+      setMsg(`บันทึกพื้นที่แล้ว ✓${blocked.length ? ` (ลบไม่ได้: ${blocked.join(", ")})` : ""}`);
+      setTimeout(() => window.location.reload(), 1200);
+    } else setMsg(errMsg(d.error as string | undefined));
   };
 
   return (
