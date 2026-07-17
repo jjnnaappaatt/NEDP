@@ -1,0 +1,2620 @@
+{
+  "sections": [
+    {
+      "id": "general",
+      "label": "◎ ข้อมูลทั่วไป",
+      "color": "#1E3A5F",
+      "questions": [
+        {
+          "id": "G.bp_systolic",
+          "label": "ความดันโลหิต Systolic (mmHg)",
+          "type": "number",
+          "min": 60,
+          "max": 250,
+          "required": false
+        },
+        {
+          "id": "G.bp_diastolic",
+          "label": "ความดันโลหิต Diastolic (mmHg)",
+          "type": "number",
+          "min": 30,
+          "max": 180,
+          "required": false
+        },
+        {
+          "id": "G.hr",
+          "label": "ชีพจร (bpm)",
+          "type": "number",
+          "min": 30,
+          "max": 200,
+          "required": false
+        },
+        {
+          "id": "G.weight",
+          "label": "น้ำหนัก (kg)",
+          "type": "number",
+          "min": 20,
+          "max": 200,
+          "step": 0.1,
+          "required": false
+        },
+        {
+          "id": "G.height_current",
+          "label": "ส่วนสูง — ปัจจุบัน (cm)",
+          "type": "number",
+          "min": 100,
+          "max": 230,
+          "step": 0.1,
+          "required": false
+        },
+        {
+          "id": "G.bmi",
+          "label": "BMI (kg/m²) — คำนวณอัตโนมัติ",
+          "type": "derived",
+          "derived_from": [
+            "G.weight",
+            "G.height_current"
+          ]
+        },
+        {
+          "id": "G.cc_right",
+          "label": "เส้นรอบวงน่อง ขวา (cm)",
+          "type": "number",
+          "min": 10,
+          "max": 60,
+          "step": 0.1,
+          "required": false
+        },
+        {
+          "id": "G.cc_left",
+          "label": "เส้นรอบวงน่อง ซ้าย (cm)",
+          "type": "number",
+          "min": 10,
+          "max": 60,
+          "step": 0.1,
+          "required": false
+        },
+        {
+          "id": "G.sex",
+          "label": "เพศ",
+          "type": "radio",
+          "required": true,
+          "prefill_from_patient": "sex",
+          "options": [
+            {
+              "value": 0,
+              "label": "ชาย"
+            },
+            {
+              "value": 1,
+              "label": "หญิง"
+            }
+          ]
+        },
+        {
+          "id": "G.age",
+          "label": "อายุ (ปี)",
+          "type": "number",
+          "min": 55,
+          "max": 110,
+          "required": false,
+          "prefill_from_patient": "age"
+        },
+        {
+          "id": "G.education",
+          "label": "ระดับการศึกษา",
+          "type": "radio",
+          "required": false,
+          "options": [
+            {
+              "value": 0,
+              "label": "ไม่ได้เรียน"
+            },
+            {
+              "value": 1,
+              "label": "ประถมศึกษา"
+            },
+            {
+              "value": 2,
+              "label": "มัธยม/วิชาชีพ"
+            },
+            {
+              "value": 3,
+              "label": "ปริญญาตรีขึ้นไป"
+            }
+          ]
+        },
+        {
+          "id": "G.occupation",
+          "label": "อาชีพ",
+          "type": "radio",
+          "required": false,
+          "options": [
+            {
+              "value": 0,
+              "label": "ว่างงาน/เกษียณ"
+            },
+            {
+              "value": 1,
+              "label": "ลูกจ้าง"
+            },
+            {
+              "value": 2,
+              "label": "ประกอบอาชีพอิสระ"
+            },
+            {
+              "value": 3,
+              "label": "อื่นๆ"
+            }
+          ]
+        },
+        {
+          "id": "G.comorbidities",
+          "label": "โรคประจำตัว (เลือกได้หลายข้อ)",
+          "type": "checkbox_multi",
+          "required": false,
+          "options": [
+            "ไม่มี",
+            "ความดันโลหิตสูง",
+            "ไขมันในเลือดสูง",
+            "เบาหวาน",
+            "โรคหัวใจ",
+            "โรคปอดเรื้อรัง",
+            "หลอดเลือดสมอง",
+            "โรคไต",
+            "อื่นๆ"
+          ]
+        },
+        {
+          "id": "G.medications",
+          "label": "รับประทานยาประจำ",
+          "type": "radio",
+          "required": false,
+          "options": [
+            {
+              "value": 0,
+              "label": "ไม่มี"
+            },
+            {
+              "value": 1,
+              "label": "มี"
+            }
+          ]
+        },
+        {
+          "id": "G.med_adherence",
+          "label": "ความสม่ำเสมอในการรับประทานยา",
+          "type": "radio",
+          "required": false,
+          "show_if": {
+            "question": "G.medications",
+            "value": "1"
+          },
+          "options": [
+            {
+              "value": 0,
+              "label": "รับประทานทุกวัน"
+            },
+            {
+              "value": 1,
+              "label": "บางครั้ง"
+            },
+            {
+              "value": 2,
+              "label": "แทบไม่รับประทาน"
+            }
+          ]
+        },
+        {
+          "id": "G.fall_past_year",
+          "label": "ประวัติการหกล้มในช่วง 1 ปีที่ผ่านมา",
+          "type": "radio",
+          "required": false,
+          "options": [
+            {
+              "value": 0,
+              "label": "ไม่มี"
+            },
+            {
+              "value": 1,
+              "label": "มี"
+            }
+          ]
+        },
+        {
+          "id": "G.fall_past_year_freq",
+          "label": "จำนวนครั้งที่หกล้ม (ปีที่ผ่านมา)",
+          "type": "text",
+          "required": false,
+          "show_if": {
+            "question": "G.fall_past_year",
+            "value": "1"
+          }
+        },
+        {
+          "id": "G.fall_during_enroll",
+          "label": "ประวัติการหกล้มระหว่างเข้าโครงการ",
+          "type": "radio",
+          "required": false,
+          "options": [
+            {
+              "value": 0,
+              "label": "ไม่มี"
+            },
+            {
+              "value": 1,
+              "label": "มี"
+            }
+          ]
+        },
+        {
+          "id": "G.fall_during_enroll_freq",
+          "label": "จำนวนครั้งที่หกล้ม (ระหว่างโครงการ)",
+          "type": "text",
+          "required": false,
+          "show_if": {
+            "question": "G.fall_during_enroll",
+            "value": "1"
+          }
+        },
+        {
+          "id": "G.aai_q1",
+          "label": "AAI 1: สุขภาพกายโดยรวม (ช่วง 7 วันที่ผ่านมา)",
+          "type": "radio",
+          "required": false,
+          "tool": "AAI",
+          "options": [
+            {
+              "value": 0,
+              "label": "ไม่ดีเลย"
+            },
+            {
+              "value": 1,
+              "label": "ไม่ดี"
+            },
+            {
+              "value": 2,
+              "label": "ปานกลาง"
+            },
+            {
+              "value": 3,
+              "label": "ดี"
+            },
+            {
+              "value": 4,
+              "label": "ดีมาก"
+            }
+          ]
+        },
+        {
+          "id": "G.aai_q2",
+          "label": "AAI 2: ความถี่ออกกำลังกาย (6 เดือนที่ผ่านมา)",
+          "type": "radio",
+          "required": false,
+          "tool": "AAI",
+          "options": [
+            {
+              "value": 0,
+              "label": "ไม่ออกเลย"
+            },
+            {
+              "value": 1,
+              "label": "ไม่ถึง 1 วัน/สัปดาห์"
+            },
+            {
+              "value": 2,
+              "label": "1–2 วัน/สัปดาห์"
+            },
+            {
+              "value": 3,
+              "label": "3–4 วัน/สัปดาห์"
+            },
+            {
+              "value": 4,
+              "label": "ทุกวัน"
+            }
+          ]
+        },
+        {
+          "id": "G.aai_q3",
+          "label": "AAI 3: ความสามารถดูแลตนเอง (ADL)",
+          "type": "radio",
+          "required": false,
+          "tool": "AAI",
+          "options": [
+            {
+              "value": 0,
+              "label": "ต้องการความช่วยเหลือทุกอย่าง"
+            },
+            {
+              "value": 1,
+              "label": "ต้องการความช่วยเหลือ"
+            },
+            {
+              "value": 2,
+              "label": "ทำได้บางส่วน"
+            },
+            {
+              "value": 3,
+              "label": "ทำได้ทั้งหมดเอง"
+            }
+          ]
+        },
+        {
+          "id": "G.aai_q4",
+          "label": "AAI 4: การเข้าร่วมกิจกรรมชมรม (1 ปีที่ผ่านมา)",
+          "type": "radio",
+          "required": false,
+          "tool": "AAI",
+          "options": [
+            {
+              "value": 0,
+              "label": "ไม่เคยเลย"
+            },
+            {
+              "value": 1,
+              "label": "น้อยกว่า 1 ครั้ง/เดือน"
+            },
+            {
+              "value": 2,
+              "label": "1–2 ครั้ง/เดือน"
+            },
+            {
+              "value": 3,
+              "label": "1–2 ครั้ง/สัปดาห์"
+            },
+            {
+              "value": 4,
+              "label": "ทุกครั้งที่มี"
+            }
+          ]
+        },
+        {
+          "id": "G.aai_q5",
+          "label": "AAI 5: การเข้าร่วมกิจกรรมในวันสำคัญ (1 ปีที่ผ่านมา)",
+          "type": "radio",
+          "required": false,
+          "tool": "AAI",
+          "options": [
+            {
+              "value": 0,
+              "label": "ไม่เคยเลย"
+            },
+            {
+              "value": 1,
+              "label": "น้อยกว่า 1 ครั้ง/ปี"
+            },
+            {
+              "value": 2,
+              "label": "1–2 ครั้ง/ปี"
+            },
+            {
+              "value": 3,
+              "label": "3–5 ครั้ง/ปี"
+            },
+            {
+              "value": 4,
+              "label": "ทุกครั้งที่มีกิจกรรม"
+            }
+          ]
+        },
+        {
+          "id": "G.aai_q6",
+          "label": "AAI 6: ความสามารถใช้เทคโนโลยี/ICT",
+          "type": "radio",
+          "required": false,
+          "tool": "AAI",
+          "options": [
+            {
+              "value": 0,
+              "label": "ไม่เคยใช้"
+            },
+            {
+              "value": 1,
+              "label": "ต้องการความช่วยเหลือ"
+            },
+            {
+              "value": 2,
+              "label": "ใช้ได้บางส่วน"
+            },
+            {
+              "value": 3,
+              "label": "ใช้ได้คล่องแคล่ว"
+            }
+          ]
+        },
+        {
+          "id": "G.aai_q7",
+          "label": "AAI G.7★: การตรวจสุขภาพประจำปี (12 เดือนที่ผ่านมา)",
+          "type": "radio",
+          "required": false,
+          "tool": "AAI",
+          "options": [
+            {
+              "value": 0,
+              "label": "ไม่เคยตรวจเลย"
+            },
+            {
+              "value": 1,
+              "label": "ตรวจครั้งเดียว ไม่ติดตาม"
+            },
+            {
+              "value": 2,
+              "label": "ตรวจและติดตามบางส่วน"
+            },
+            {
+              "value": 3,
+              "label": "ตรวจครบ ติดตามสม่ำเสมอ"
+            },
+            {
+              "value": 4,
+              "label": "ตรวจครบ + ติดตามต่อเนื่องทุกนัด"
+            }
+          ]
+        },
+        {
+          "id": "G.has_disease",
+          "label": "มีโรคประจำตัวหรือไม่?",
+          "type": "radio",
+          "required": false,
+          "options": [
+            {
+              "value": 0,
+              "label": "ไม่มีโรคประจำตัว"
+            },
+            {
+              "value": 1,
+              "label": "มีโรคประจำตัว"
+            }
+          ]
+        },
+        {
+          "id": "G.aai_q8",
+          "label": "AAI G.8★: ระดับการควบคุมโรคประจำตัว",
+          "type": "radio",
+          "required": false,
+          "tool": "AAI",
+          "show_if": {
+            "question": "G.has_disease",
+            "value": "1"
+          },
+          "options": [
+            {
+              "value": 0,
+              "label": "ควบคุมไม่ได้เลย"
+            },
+            {
+              "value": 1,
+              "label": "ควบคุมได้น้อย"
+            },
+            {
+              "value": 2,
+              "label": "ควบคุมได้ปานกลาง"
+            },
+            {
+              "value": 3,
+              "label": "ควบคุมได้ดี"
+            },
+            {
+              "value": 4,
+              "label": "ควบคุมได้ดีเยี่ยม + ปรับพฤติกรรม"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "fall",
+      "label": "① ความเสี่ยงการล้ม",
+      "color": "#8B1A1A",
+      "questions": [
+        {
+          "id": "F.eq5d_1",
+          "label": "EQ-5D 1: การเดิน",
+          "type": "radio",
+          "required": false,
+          "tool": "EQ5D",
+          "options": [
+            {
+              "value": 1,
+              "label": "ไม่มีปัญหา"
+            },
+            {
+              "value": 2,
+              "label": "มีปัญหาเล็กน้อย"
+            },
+            {
+              "value": 3,
+              "label": "มีปัญหาปานกลาง"
+            },
+            {
+              "value": 4,
+              "label": "มีปัญหามาก"
+            },
+            {
+              "value": 5,
+              "label": "ไม่สามารถเดินได้"
+            }
+          ]
+        },
+        {
+          "id": "F.eq5d_2",
+          "label": "EQ-5D 2: การดูแลตนเอง",
+          "type": "radio",
+          "required": false,
+          "tool": "EQ5D",
+          "options": [
+            {
+              "value": 1,
+              "label": "ไม่มีปัญหา"
+            },
+            {
+              "value": 2,
+              "label": "มีปัญหาเล็กน้อย"
+            },
+            {
+              "value": 3,
+              "label": "มีปัญหาปานกลาง"
+            },
+            {
+              "value": 4,
+              "label": "มีปัญหามาก"
+            },
+            {
+              "value": 5,
+              "label": "ไม่สามารถดูแลตนเองได้"
+            }
+          ]
+        },
+        {
+          "id": "F.eq5d_3",
+          "label": "EQ-5D 3: กิจกรรมปกติ",
+          "type": "radio",
+          "required": false,
+          "tool": "EQ5D",
+          "options": [
+            {
+              "value": 1,
+              "label": "ไม่มีปัญหา"
+            },
+            {
+              "value": 2,
+              "label": "มีปัญหาเล็กน้อย"
+            },
+            {
+              "value": 3,
+              "label": "มีปัญหาปานกลาง"
+            },
+            {
+              "value": 4,
+              "label": "มีปัญหามาก"
+            },
+            {
+              "value": 5,
+              "label": "ไม่สามารถทำได้"
+            }
+          ]
+        },
+        {
+          "id": "F.eq5d_4",
+          "label": "EQ-5D 4: ความเจ็บปวด/ไม่สบาย",
+          "type": "radio",
+          "required": false,
+          "tool": "EQ5D",
+          "options": [
+            {
+              "value": 1,
+              "label": "ไม่มีเลย"
+            },
+            {
+              "value": 2,
+              "label": "เล็กน้อย"
+            },
+            {
+              "value": 3,
+              "label": "ปานกลาง"
+            },
+            {
+              "value": 4,
+              "label": "รุนแรง"
+            },
+            {
+              "value": 5,
+              "label": "รุนแรงมาก"
+            }
+          ]
+        },
+        {
+          "id": "F.eq5d_5",
+          "label": "EQ-5D 5: วิตกกังวล/ซึมเศร้า",
+          "type": "radio",
+          "required": false,
+          "tool": "EQ5D",
+          "options": [
+            {
+              "value": 1,
+              "label": "ไม่มีเลย"
+            },
+            {
+              "value": 2,
+              "label": "เล็กน้อย"
+            },
+            {
+              "value": 3,
+              "label": "ปานกลาง"
+            },
+            {
+              "value": 4,
+              "label": "รุนแรง"
+            },
+            {
+              "value": 5,
+              "label": "รุนแรงมาก"
+            }
+          ]
+        },
+        {
+          "id": "F.eq_vas",
+          "label": "EQ-VAS: สุขภาพโดยรวมวันนี้ (0=แย่สุด, 100=ดีสุด)",
+          "type": "number",
+          "min": 0,
+          "max": 100,
+          "required": false,
+          "tool": "EQ_VAS"
+        },
+        {
+          "id": "F.hearing",
+          "label": "การได้ยิน (Finger Rub Test)",
+          "type": "radio",
+          "required": false,
+          "tool": "HEARING",
+          "options": [
+            {
+              "value": 0,
+              "label": "ปกติ"
+            },
+            {
+              "value": 1,
+              "label": "ผิดปกติ"
+            }
+          ]
+        },
+        {
+          "id": "F.vision_1",
+          "label": "การมองไกล (นับนิ้ว 3 เมตร)",
+          "type": "radio",
+          "required": false,
+          "tool": "VISION",
+          "options": [
+            {
+              "value": 0,
+              "label": "ปกติ"
+            },
+            {
+              "value": 1,
+              "label": "ผิดปกติ"
+            }
+          ]
+        },
+        {
+          "id": "F.vision_2",
+          "label": "การมองใกล้ (อ่านหนังสือ 30 ซม.)",
+          "type": "radio",
+          "required": false,
+          "tool": "VISION",
+          "options": [
+            {
+              "value": 0,
+              "label": "ปกติ"
+            },
+            {
+              "value": 1,
+              "label": "ผิดปกติ"
+            }
+          ]
+        },
+        {
+          "id": "F.vision_3",
+          "label": "ต้อกระจก",
+          "type": "radio",
+          "required": false,
+          "tool": "VISION",
+          "options": [
+            {
+              "value": 0,
+              "label": "ไม่มี"
+            },
+            {
+              "value": 1,
+              "label": "มี"
+            }
+          ]
+        },
+        {
+          "id": "F.vision_4",
+          "label": "ต้อหิน",
+          "type": "radio",
+          "required": false,
+          "tool": "VISION",
+          "options": [
+            {
+              "value": 0,
+              "label": "ไม่มี"
+            },
+            {
+              "value": 1,
+              "label": "มี"
+            }
+          ]
+        },
+        {
+          "id": "F.vision_5",
+          "label": "จอประสาทตา",
+          "type": "radio",
+          "required": false,
+          "tool": "VISION",
+          "options": [
+            {
+              "value": 0,
+              "label": "ไม่มี"
+            },
+            {
+              "value": 1,
+              "label": "มี"
+            }
+          ]
+        },
+        {
+          "id": "F.frail_1",
+          "label": "FRAIL 1: ความเหนื่อยล้า (4 สัปดาห์ที่ผ่านมา)",
+          "type": "radio",
+          "required": false,
+          "tool": "FRAIL",
+          "options": [
+            {
+              "value": 0,
+              "label": "บางครั้ง/ไม่บ่อย"
+            },
+            {
+              "value": 1,
+              "label": "บ่อยครั้ง/เกือบตลอดเวลา"
+            }
+          ]
+        },
+        {
+          "id": "F.frail_2",
+          "label": "FRAIL 2: ขึ้นบันได 10 ขั้น โดยไม่หยุดพัก",
+          "type": "radio",
+          "required": false,
+          "tool": "FRAIL",
+          "options": [
+            {
+              "value": 0,
+              "label": "ไม่มีปัญหา"
+            },
+            {
+              "value": 1,
+              "label": "มีปัญหา/ทำไม่ได้"
+            }
+          ]
+        },
+        {
+          "id": "F.frail_3",
+          "label": "FRAIL 3: เดิน 300–400 เมตร โดยไม่หยุดพัก",
+          "type": "radio",
+          "required": false,
+          "tool": "FRAIL",
+          "options": [
+            {
+              "value": 0,
+              "label": "ไม่มีปัญหา"
+            },
+            {
+              "value": 1,
+              "label": "มีปัญหา/ทำไม่ได้"
+            }
+          ]
+        },
+        {
+          "id": "F.frail_4",
+          "label": "FRAIL 4: จำนวนโรคประจำตัว",
+          "type": "radio",
+          "required": false,
+          "tool": "FRAIL",
+          "options": [
+            {
+              "value": 0,
+              "label": "0–4 โรค"
+            },
+            {
+              "value": 1,
+              "label": "5 โรคขึ้นไป"
+            }
+          ]
+        },
+        {
+          "id": "F.frail_5",
+          "label": "FRAIL 5: น้ำหนักลดโดยไม่ตั้งใจ (1 ปีที่ผ่านมา)",
+          "type": "radio",
+          "required": false,
+          "tool": "FRAIL",
+          "options": [
+            {
+              "value": 0,
+              "label": "น้อยกว่า 5%"
+            },
+            {
+              "value": 1,
+              "label": "5% หรือมากกว่า"
+            }
+          ]
+        },
+        {
+          "id": "F.fesi_1",
+          "label": "FES-I 1: ใส่/ถอดเสื้อผ้า",
+          "type": "radio",
+          "required": false,
+          "tool": "FES_I",
+          "options": [
+            {
+              "value": 1,
+              "label": "ไม่กังวลเลย"
+            },
+            {
+              "value": 2,
+              "label": "กังวลเล็กน้อย"
+            },
+            {
+              "value": 3,
+              "label": "กังวลปานกลาง"
+            },
+            {
+              "value": 4,
+              "label": "กังวลมาก"
+            }
+          ]
+        },
+        {
+          "id": "F.fesi_2",
+          "label": "FES-I 2: อาบน้ำ",
+          "type": "radio",
+          "required": false,
+          "tool": "FES_I",
+          "options": [
+            {
+              "value": 1,
+              "label": "ไม่กังวลเลย"
+            },
+            {
+              "value": 2,
+              "label": "กังวลเล็กน้อย"
+            },
+            {
+              "value": 3,
+              "label": "กังวลปานกลาง"
+            },
+            {
+              "value": 4,
+              "label": "กังวลมาก"
+            }
+          ]
+        },
+        {
+          "id": "F.fesi_3",
+          "label": "FES-I 3: ลุกจากเก้าอี้/นั่งลง",
+          "type": "radio",
+          "required": false,
+          "tool": "FES_I",
+          "options": [
+            {
+              "value": 1,
+              "label": "ไม่กังวลเลย"
+            },
+            {
+              "value": 2,
+              "label": "กังวลเล็กน้อย"
+            },
+            {
+              "value": 3,
+              "label": "กังวลปานกลาง"
+            },
+            {
+              "value": 4,
+              "label": "กังวลมาก"
+            }
+          ]
+        },
+        {
+          "id": "F.fesi_4",
+          "label": "FES-I 4: ขึ้น/ลงบันได",
+          "type": "radio",
+          "required": false,
+          "tool": "FES_I",
+          "options": [
+            {
+              "value": 1,
+              "label": "ไม่กังวลเลย"
+            },
+            {
+              "value": 2,
+              "label": "กังวลเล็กน้อย"
+            },
+            {
+              "value": 3,
+              "label": "กังวลปานกลาง"
+            },
+            {
+              "value": 4,
+              "label": "กังวลมาก"
+            }
+          ]
+        },
+        {
+          "id": "F.fesi_5",
+          "label": "FES-I 5: เอื้อมหยิบของสูง/ก้มเก็บของ",
+          "type": "radio",
+          "required": false,
+          "tool": "FES_I",
+          "options": [
+            {
+              "value": 1,
+              "label": "ไม่กังวลเลย"
+            },
+            {
+              "value": 2,
+              "label": "กังวลเล็กน้อย"
+            },
+            {
+              "value": 3,
+              "label": "กังวลปานกลาง"
+            },
+            {
+              "value": 4,
+              "label": "กังวลมาก"
+            }
+          ]
+        },
+        {
+          "id": "F.fesi_6",
+          "label": "FES-I 6: เดินขึ้น/ลงทางลาด",
+          "type": "radio",
+          "required": false,
+          "tool": "FES_I",
+          "options": [
+            {
+              "value": 1,
+              "label": "ไม่กังวลเลย"
+            },
+            {
+              "value": 2,
+              "label": "กังวลเล็กน้อย"
+            },
+            {
+              "value": 3,
+              "label": "กังวลปานกลาง"
+            },
+            {
+              "value": 4,
+              "label": "กังวลมาก"
+            }
+          ]
+        },
+        {
+          "id": "F.fesi_7",
+          "label": "FES-I 7: เข้าร่วมงานสังสรรค์/ซื้อของ",
+          "type": "radio",
+          "required": false,
+          "tool": "FES_I",
+          "options": [
+            {
+              "value": 1,
+              "label": "ไม่กังวลเลย"
+            },
+            {
+              "value": 2,
+              "label": "กังวลเล็กน้อย"
+            },
+            {
+              "value": 3,
+              "label": "กังวลปานกลาง"
+            },
+            {
+              "value": 4,
+              "label": "กังวลมาก"
+            }
+          ]
+        },
+        {
+          "id": "F.barthel_1",
+          "label": "Barthel 1: การรับประทานอาหาร",
+          "type": "radio",
+          "required": false,
+          "tool": "BARTHEL",
+          "options": [
+            {
+              "value": 0,
+              "label": "ต้องป้อน/ช่วยทั้งหมด"
+            },
+            {
+              "value": 5,
+              "label": "ต้องการความช่วยเหลือบางส่วน"
+            },
+            {
+              "value": 10,
+              "label": "ทำได้เองทั้งหมด"
+            }
+          ]
+        },
+        {
+          "id": "F.barthel_2",
+          "label": "Barthel 2: การลุกจากเตียงไปนั่งเก้าอี้",
+          "type": "radio",
+          "required": false,
+          "tool": "BARTHEL",
+          "options": [
+            {
+              "value": 0,
+              "label": "ทำไม่ได้เลย / นั่งไม่ได้"
+            },
+            {
+              "value": 5,
+              "label": "ต้องช่วยมาก (1–2 คน)"
+            },
+            {
+              "value": 10,
+              "label": "ต้องช่วยเล็กน้อย"
+            },
+            {
+              "value": 15,
+              "label": "ทำได้เอง"
+            }
+          ]
+        },
+        {
+          "id": "F.barthel_3",
+          "label": "Barthel 3: การทำความสะอาดร่างกาย (ล้างหน้า แปรงฟัน)",
+          "type": "radio",
+          "required": false,
+          "tool": "BARTHEL",
+          "options": [
+            {
+              "value": 0,
+              "label": "ต้องช่วยทั้งหมด"
+            },
+            {
+              "value": 5,
+              "label": "ทำได้เอง"
+            }
+          ]
+        },
+        {
+          "id": "F.barthel_4",
+          "label": "Barthel 4: การใช้ห้องน้ำ",
+          "type": "radio",
+          "required": false,
+          "tool": "BARTHEL",
+          "options": [
+            {
+              "value": 0,
+              "label": "ต้องช่วยทั้งหมด"
+            },
+            {
+              "value": 5,
+              "label": "ต้องการความช่วยเหลือ"
+            },
+            {
+              "value": 10,
+              "label": "ทำได้เอง"
+            }
+          ]
+        },
+        {
+          "id": "F.barthel_5",
+          "label": "Barthel 5: การอาบน้ำ",
+          "type": "radio",
+          "required": false,
+          "tool": "BARTHEL",
+          "options": [
+            {
+              "value": 0,
+              "label": "ต้องช่วยทั้งหมด"
+            },
+            {
+              "value": 5,
+              "label": "ทำได้เอง"
+            }
+          ]
+        },
+        {
+          "id": "F.barthel_6",
+          "label": "Barthel 6: การเดิน",
+          "type": "radio",
+          "required": false,
+          "tool": "BARTHEL",
+          "options": [
+            {
+              "value": 0,
+              "label": "เดินไม่ได้เลย"
+            },
+            {
+              "value": 5,
+              "label": "ใช้รถเข็น"
+            },
+            {
+              "value": 10,
+              "label": "เดินได้โดยมีคนช่วย"
+            },
+            {
+              "value": 15,
+              "label": "เดินได้เอง"
+            }
+          ]
+        },
+        {
+          "id": "F.barthel_7",
+          "label": "Barthel 7: การขึ้น/ลงบันได",
+          "type": "radio",
+          "required": false,
+          "tool": "BARTHEL",
+          "options": [
+            {
+              "value": 0,
+              "label": "ทำไม่ได้"
+            },
+            {
+              "value": 5,
+              "label": "ต้องการความช่วยเหลือ"
+            },
+            {
+              "value": 10,
+              "label": "ทำได้เอง"
+            }
+          ]
+        },
+        {
+          "id": "F.barthel_8",
+          "label": "Barthel 8: การแต่งตัว",
+          "type": "radio",
+          "required": false,
+          "tool": "BARTHEL",
+          "options": [
+            {
+              "value": 0,
+              "label": "ต้องช่วยทั้งหมด"
+            },
+            {
+              "value": 5,
+              "label": "ต้องการความช่วยเหลือ"
+            },
+            {
+              "value": 10,
+              "label": "ทำได้เอง"
+            }
+          ]
+        },
+        {
+          "id": "F.barthel_9",
+          "label": "Barthel 9: การควบคุมการถ่ายอุจจาระ",
+          "type": "radio",
+          "required": false,
+          "tool": "BARTHEL",
+          "options": [
+            {
+              "value": 0,
+              "label": "กลั้นไม่ได้"
+            },
+            {
+              "value": 5,
+              "label": "กลั้นได้บางครั้ง"
+            },
+            {
+              "value": 10,
+              "label": "กลั้นได้ปกติ"
+            }
+          ]
+        },
+        {
+          "id": "F.barthel_10",
+          "label": "Barthel 10: การควบคุมการถ่ายปัสสาวะ",
+          "type": "radio",
+          "required": false,
+          "tool": "BARTHEL",
+          "options": [
+            {
+              "value": 0,
+              "label": "กลั้นไม่ได้"
+            },
+            {
+              "value": 5,
+              "label": "กลั้นได้บางครั้ง"
+            },
+            {
+              "value": 10,
+              "label": "กลั้นได้ปกติ"
+            }
+          ]
+        },
+        {
+          "id": "F.liadl_1",
+          "label": "L-IADL 1: การใช้โทรศัพท์",
+          "type": "radio",
+          "required": false,
+          "tool": "LIADL",
+          "options": [
+            {
+              "value": 0,
+              "label": "ต้องการความช่วยเหลือ"
+            },
+            {
+              "value": 1,
+              "label": "ทำได้เอง"
+            }
+          ]
+        },
+        {
+          "id": "F.liadl_2",
+          "label": "L-IADL 2: การซื้อของ",
+          "type": "radio",
+          "required": false,
+          "tool": "LIADL",
+          "options": [
+            {
+              "value": 0,
+              "label": "ต้องการความช่วยเหลือ"
+            },
+            {
+              "value": 1,
+              "label": "ทำได้เอง"
+            }
+          ]
+        },
+        {
+          "id": "F.liadl_3",
+          "label": "L-IADL 3: การเตรียมอาหาร",
+          "type": "radio",
+          "required": false,
+          "tool": "LIADL",
+          "options": [
+            {
+              "value": 0,
+              "label": "ต้องการความช่วยเหลือ"
+            },
+            {
+              "value": 1,
+              "label": "ทำได้เอง"
+            }
+          ]
+        },
+        {
+          "id": "F.liadl_4",
+          "label": "L-IADL 4: การทำงานบ้าน",
+          "type": "radio",
+          "required": false,
+          "tool": "LIADL",
+          "options": [
+            {
+              "value": 0,
+              "label": "ต้องการความช่วยเหลือ"
+            },
+            {
+              "value": 1,
+              "label": "ทำได้เอง"
+            }
+          ]
+        },
+        {
+          "id": "F.liadl_5",
+          "label": "L-IADL 5: การซักผ้า",
+          "type": "radio",
+          "required": false,
+          "tool": "LIADL",
+          "options": [
+            {
+              "value": 0,
+              "label": "ต้องการความช่วยเหลือ"
+            },
+            {
+              "value": 1,
+              "label": "ทำได้เอง"
+            }
+          ]
+        },
+        {
+          "id": "F.liadl_6",
+          "label": "L-IADL 6: การเดินทาง",
+          "type": "radio",
+          "required": false,
+          "tool": "LIADL",
+          "options": [
+            {
+              "value": 0,
+              "label": "ต้องการความช่วยเหลือ"
+            },
+            {
+              "value": 1,
+              "label": "ทำได้เอง"
+            }
+          ]
+        },
+        {
+          "id": "F.liadl_7",
+          "label": "L-IADL 7: การรับประทานยา",
+          "type": "radio",
+          "required": false,
+          "tool": "LIADL",
+          "options": [
+            {
+              "value": 0,
+              "label": "ต้องการความช่วยเหลือ"
+            },
+            {
+              "value": 1,
+              "label": "ทำได้เอง"
+            }
+          ]
+        },
+        {
+          "id": "F.liadl_8",
+          "label": "L-IADL 8: การจัดการเงิน",
+          "type": "radio",
+          "required": false,
+          "tool": "LIADL",
+          "options": [
+            {
+              "value": 0,
+              "label": "ต้องการความช่วยเหลือ"
+            },
+            {
+              "value": 1,
+              "label": "ทำได้เอง"
+            }
+          ]
+        },
+        {
+          "id": "F.env_1",
+          "label": "สภาพแวดล้อม 1: ธรณีประตูสูง/ขอบพื้นขรุขระ",
+          "type": "radio",
+          "required": false,
+          "tool": "ENVIRONMENT",
+          "options": [
+            {
+              "value": 0,
+              "label": "ไม่มี"
+            },
+            {
+              "value": 1,
+              "label": "มี (เสี่ยง)"
+            }
+          ]
+        },
+        {
+          "id": "F.env_2",
+          "label": "สภาพแวดล้อม 2: พื้นลื่น",
+          "type": "radio",
+          "required": false,
+          "tool": "ENVIRONMENT",
+          "options": [
+            {
+              "value": 0,
+              "label": "ไม่มี"
+            },
+            {
+              "value": 1,
+              "label": "มี (เสี่ยง)"
+            }
+          ]
+        },
+        {
+          "id": "F.env_3",
+          "label": "สภาพแวดล้อม 3: สิ่งกีดขวางในบ้าน",
+          "type": "radio",
+          "required": false,
+          "tool": "ENVIRONMENT",
+          "options": [
+            {
+              "value": 0,
+              "label": "ไม่มี"
+            },
+            {
+              "value": 1,
+              "label": "มี (เสี่ยง)"
+            }
+          ]
+        },
+        {
+          "id": "F.env_4",
+          "label": "สภาพแวดล้อม 4: เด็กเล็ก/สัตว์เลี้ยงในบ้าน",
+          "type": "radio",
+          "required": false,
+          "tool": "ENVIRONMENT",
+          "options": [
+            {
+              "value": 0,
+              "label": "ไม่มี"
+            },
+            {
+              "value": 1,
+              "label": "มี (เสี่ยง)"
+            }
+          ]
+        },
+        {
+          "id": "F.env_5",
+          "label": "สภาพแวดล้อม 5: ห้องน้ำ — ไม่มีราวจับ",
+          "type": "radio",
+          "required": false,
+          "tool": "ENVIRONMENT",
+          "options": [
+            {
+              "value": 0,
+              "label": "มีราวจับ (ปลอดภัย)"
+            },
+            {
+              "value": 1,
+              "label": "ไม่มีราวจับ (เสี่ยง)"
+            }
+          ]
+        },
+        {
+          "id": "F.env_6",
+          "label": "สภาพแวดล้อม 6: แสงสว่างไม่เพียงพอ",
+          "type": "radio",
+          "required": false,
+          "tool": "ENVIRONMENT",
+          "options": [
+            {
+              "value": 0,
+              "label": "เพียงพอ"
+            },
+            {
+              "value": 1,
+              "label": "ไม่เพียงพอ (เสี่ยง)"
+            }
+          ]
+        },
+        {
+          "id": "F.env_7",
+          "label": "สภาพแวดล้อม 7: ทางเดินนอกบ้านขรุขระ/ชำรุด",
+          "type": "radio",
+          "required": false,
+          "tool": "ENVIRONMENT",
+          "options": [
+            {
+              "value": 0,
+              "label": "ไม่มี"
+            },
+            {
+              "value": 1,
+              "label": "มี (เสี่ยง)"
+            }
+          ]
+        },
+        {
+          "id": "F.env_8",
+          "label": "สภาพแวดล้อม 8: หลุมบ่อ/พื้นผิวขรุขระ",
+          "type": "radio",
+          "required": false,
+          "tool": "ENVIRONMENT",
+          "options": [
+            {
+              "value": 0,
+              "label": "ไม่มี"
+            },
+            {
+              "value": 1,
+              "label": "มี (เสี่ยง)"
+            }
+          ]
+        },
+        {
+          "id": "F.env_9",
+          "label": "สภาพแวดล้อม 9: สัตว์เลี้ยงนอกบ้าน",
+          "type": "radio",
+          "required": false,
+          "tool": "ENVIRONMENT",
+          "options": [
+            {
+              "value": 0,
+              "label": "ไม่มี"
+            },
+            {
+              "value": 1,
+              "label": "มี (เสี่ยง)"
+            }
+          ]
+        },
+        {
+          "id": "F.minicog_clock",
+          "label": "Mini-Cog: วาดนาฬิกา (Clock Drawing Test)",
+          "type": "radio",
+          "required": false,
+          "tool": "MINI_COG",
+          "options": [
+            {
+              "value": 0,
+              "label": "วาดผิด (0 คะแนน)"
+            },
+            {
+              "value": 2,
+              "label": "วาดถูก (2 คะแนน)"
+            }
+          ]
+        },
+        {
+          "id": "F.minicog_recall",
+          "label": "Mini-Cog: จำคำศัพท์ได้ (3 คำ)",
+          "type": "radio",
+          "required": false,
+          "tool": "MINI_COG",
+          "options": [
+            {
+              "value": 0,
+              "label": "จำไม่ได้เลย"
+            },
+            {
+              "value": 1,
+              "label": "จำได้ 1 คำ"
+            },
+            {
+              "value": 2,
+              "label": "จำได้ 2 คำ"
+            },
+            {
+              "value": 3,
+              "label": "จำได้ครบ 3 คำ"
+            }
+          ]
+        },
+        {
+          "id": "F.tug_seconds",
+          "label": "TUG (วินาที) — เวลาลุกจากเก้าอี้ เดิน 3 ม. กลับมานั่ง",
+          "type": "number",
+          "min": 0,
+          "max": 120,
+          "step": 0.1,
+          "required": false,
+          "tool": "TUG"
+        },
+        {
+          "id": "F.sts5_seconds",
+          "label": "5×STS (วินาที) — เวลาลุก-นั่งเก้าอี้ 5 ครั้ง",
+          "type": "number",
+          "min": 0,
+          "max": 120,
+          "step": 0.1,
+          "required": false,
+          "tool": "STS5"
+        },
+        {
+          "id": "F.chair_reach",
+          "label": "Chair Sit and Reach (cm) — วัดความยืดหยุ่น",
+          "type": "number",
+          "min": -50,
+          "max": 50,
+          "step": 0.1,
+          "required": false
+        }
+      ]
+    },
+    {
+      "id": "bmd",
+      "label": "② คัดกรองกระดูก (BMD)",
+      "color": "#0C47A2",
+      "questions": [
+        {
+          "id": "B.frax_category",
+          "label": "B.FRAX Score — ระดับความเสี่ยง",
+          "type": "radio",
+          "required": false,
+          "tool": "BMD_FRAX",
+          "options": [
+            {
+              "value": 0,
+              "label": "ปกติ"
+            },
+            {
+              "value": 1,
+              "label": "เสี่ยง"
+            },
+            {
+              "value": 2,
+              "label": "เสี่ยงสูง"
+            }
+          ]
+        },
+        {
+          "id": "B.height_prev",
+          "label": "ส่วนสูง — ก่อนเข้าโครงการ (cm)",
+          "type": "number",
+          "min": 100,
+          "max": 230,
+          "step": 0.1,
+          "required": false,
+          "tool": "BMD_HEIGHT"
+        },
+        {
+          "id": "B.fracture_risk_scale",
+          "label": "B.1★ Fracture Risk Scale (0–4)",
+          "type": "radio",
+          "required": false,
+          "tool": "BMD_B1",
+          "options": [
+            {
+              "value": 0,
+              "label": "0 — ไม่มีกระดูกหัก ไม่มีปัจจัยเสี่ยง"
+            },
+            {
+              "value": 1,
+              "label": "1 — กระดูกหักครั้งเดียว นานกว่า 2 ปี"
+            },
+            {
+              "value": 2,
+              "label": "2 — กระดูกหัก + ปัจจัยเสี่ยงปานกลาง"
+            },
+            {
+              "value": 3,
+              "label": "3 — หักหลายจุด หรือภายใน 12 เดือน (เสี่ยงสูง)"
+            },
+            {
+              "value": 4,
+              "label": "4 — กระดูกหักล่าสุด (<6 เดือน) หรือเสี่ยงสูงมาก"
+            }
+          ]
+        },
+        {
+          "id": "B.wound_grade",
+          "label": "B.2★ ระดับแผลกดทับ (0–4)",
+          "type": "radio",
+          "required": false,
+          "tool": "BMD_B2",
+          "options": [
+            {
+              "value": 0,
+              "label": "0 — ไม่มีแผล"
+            },
+            {
+              "value": 1,
+              "label": "1 — ผิวหนังแดง ไม่ขาด"
+            },
+            {
+              "value": 2,
+              "label": "2 — มีตุ่มพอง/แผลตื้น"
+            },
+            {
+              "value": 3,
+              "label": "3 — แผลลึกถึงชั้นไขมัน"
+            },
+            {
+              "value": 4,
+              "label": "4 — แผลลึกถึงกระดูก/เอ็น"
+            }
+          ]
+        },
+        {
+          "id": "B.family_fracture",
+          "label": "ประวัติกระดูกหักในครอบครัว",
+          "type": "radio",
+          "required": false,
+          "options": [
+            {
+              "value": 0,
+              "label": "ไม่มี"
+            },
+            {
+              "value": 1,
+              "label": "มี"
+            },
+            {
+              "value": 2,
+              "label": "ไม่ทราบ"
+            }
+          ]
+        },
+        {
+          "id": "B.sun_exposure",
+          "label": "การรับแสงแดด",
+          "type": "radio",
+          "required": false,
+          "options": [
+            {
+              "value": 0,
+              "label": "ทุกวัน"
+            },
+            {
+              "value": 1,
+              "label": "3–4 วัน/สัปดาห์"
+            },
+            {
+              "value": 2,
+              "label": "น้อยกว่า 3 วัน/สัปดาห์"
+            },
+            {
+              "value": 3,
+              "label": "แทบไม่โดนแสงแดด"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "nutrition",
+      "label": "③ โภชนาการ",
+      "color": "#1A7A2A",
+      "questions": [
+        {
+          "id": "N.oral_1",
+          "label": "สุขภาพช่องปาก 1: ฟันผุ/มีโพรง",
+          "type": "radio",
+          "required": false,
+          "tool": "ORAL_HEALTH",
+          "options": [
+            {
+              "value": 0,
+              "label": "ไม่มี"
+            },
+            {
+              "value": 1,
+              "label": "มี"
+            }
+          ]
+        },
+        {
+          "id": "N.oral_2",
+          "label": "สุขภาพช่องปาก 2: เหงือกบวม/ฟันโยก",
+          "type": "radio",
+          "required": false,
+          "tool": "ORAL_HEALTH",
+          "options": [
+            {
+              "value": 0,
+              "label": "ไม่มี"
+            },
+            {
+              "value": 1,
+              "label": "มี"
+            }
+          ]
+        },
+        {
+          "id": "N.oral_3",
+          "label": "สุขภาพช่องปาก 3: ฟันน้อยกว่า 20 ซี่",
+          "type": "radio",
+          "required": false,
+          "tool": "ORAL_HEALTH",
+          "options": [
+            {
+              "value": 0,
+              "label": "ไม่ใช่ (20 ซี่หรือมากกว่า)"
+            },
+            {
+              "value": 1,
+              "label": "ใช่ (น้อยกว่า 20 ซี่)"
+            }
+          ]
+        },
+        {
+          "id": "N.oral_4",
+          "label": "สุขภาพช่องปาก 4: แผลในปาก/ก้อนผิดปกติ",
+          "type": "radio",
+          "required": false,
+          "tool": "ORAL_HEALTH",
+          "options": [
+            {
+              "value": 0,
+              "label": "ไม่มี"
+            },
+            {
+              "value": 1,
+              "label": "มี"
+            }
+          ]
+        },
+        {
+          "id": "N.oral_5",
+          "label": "สุขภาพช่องปาก 5: ปากแห้ง/ลิ้นแห้ง",
+          "type": "radio",
+          "required": false,
+          "tool": "ORAL_HEALTH",
+          "options": [
+            {
+              "value": 0,
+              "label": "ไม่มี"
+            },
+            {
+              "value": 1,
+              "label": "มี"
+            }
+          ]
+        },
+        {
+          "id": "N.oral_6",
+          "label": "สุขภาพช่องปาก 6: สุขอนามัยช่องปาก",
+          "type": "radio",
+          "required": false,
+          "tool": "ORAL_HEALTH",
+          "options": [
+            {
+              "value": 0,
+              "label": "สะอาด"
+            },
+            {
+              "value": 1,
+              "label": "ไม่สะอาด"
+            }
+          ]
+        },
+        {
+          "id": "N.mna_1",
+          "label": "MNA 1: ความอยากอาหารลดลงในช่วง 3 เดือน",
+          "type": "radio",
+          "required": false,
+          "tool": "MNA_SF",
+          "options": [
+            {
+              "value": 0,
+              "label": "ลดลงมาก"
+            },
+            {
+              "value": 1,
+              "label": "ลดลงปานกลาง"
+            },
+            {
+              "value": 2,
+              "label": "ไม่ลดลง"
+            }
+          ]
+        },
+        {
+          "id": "N.mna_2",
+          "label": "MNA 2: น้ำหนักลดในช่วง 3 เดือน",
+          "type": "radio",
+          "required": false,
+          "tool": "MNA_SF",
+          "options": [
+            {
+              "value": 0,
+              "label": "ลดมากกว่า 3 กก."
+            },
+            {
+              "value": 1,
+              "label": "ไม่ทราบ"
+            },
+            {
+              "value": 2,
+              "label": "ลด 1–3 กก."
+            },
+            {
+              "value": 3,
+              "label": "ไม่ลดลง"
+            }
+          ]
+        },
+        {
+          "id": "N.mna_3",
+          "label": "MNA 3: การเคลื่อนไหว",
+          "type": "radio",
+          "required": false,
+          "tool": "MNA_SF",
+          "options": [
+            {
+              "value": 0,
+              "label": "นอนติดเตียง/นั่งติดเก้าอี้"
+            },
+            {
+              "value": 1,
+              "label": "ลุกจากเตียงได้แต่ไม่ออกนอกบ้าน"
+            },
+            {
+              "value": 2,
+              "label": "ออกนอกบ้านได้"
+            }
+          ]
+        },
+        {
+          "id": "N.mna_4",
+          "label": "MNA 4: ป่วยเฉียบพลัน/ความเครียดในช่วง 3 เดือน",
+          "type": "radio",
+          "required": false,
+          "tool": "MNA_SF",
+          "options": [
+            {
+              "value": 0,
+              "label": "ใช่"
+            },
+            {
+              "value": 2,
+              "label": "ไม่ใช่"
+            }
+          ]
+        },
+        {
+          "id": "N.mna_5",
+          "label": "MNA 5: ปัญหาทางจิตใจ/สมอง",
+          "type": "radio",
+          "required": false,
+          "tool": "MNA_SF",
+          "options": [
+            {
+              "value": 0,
+              "label": "สมองเสื่อมรุนแรง/ซึมเศร้า"
+            },
+            {
+              "value": 1,
+              "label": "สมองเสื่อมเล็กน้อย"
+            },
+            {
+              "value": 2,
+              "label": "ไม่มีปัญหา"
+            }
+          ]
+        },
+        {
+          "id": "N.mna_6a",
+          "label": "MNA 6a: BMI (ใช้เมื่อ BMI วัดได้)",
+          "type": "radio",
+          "required": false,
+          "tool": "MNA_SF",
+          "show_if": {
+            "question": "G.bmi",
+            "not_empty": true
+          },
+          "options": [
+            {
+              "value": 0,
+              "label": "น้อยกว่า 19"
+            },
+            {
+              "value": 1,
+              "label": "19 ถึงน้อยกว่า 21"
+            },
+            {
+              "value": 2,
+              "label": "21 ถึงน้อยกว่า 23"
+            },
+            {
+              "value": 3,
+              "label": "23 หรือมากกว่า"
+            }
+          ]
+        },
+        {
+          "id": "N.mna_6b",
+          "label": "MNA 6b: เส้นรอบวงน่อง / CC (ใช้เมื่อ BMI ไม่สามารถวัดได้)",
+          "type": "radio",
+          "required": false,
+          "tool": "MNA_SF",
+          "show_if": {
+            "question": "G.bmi",
+            "empty": true
+          },
+          "options": [
+            {
+              "value": 0,
+              "label": "น้อยกว่า 31 ซม."
+            },
+            {
+              "value": 3,
+              "label": "31 ซม. หรือมากกว่า"
+            }
+          ]
+        },
+        {
+          "id": "N.tgds_1",
+          "label": "TGDS 1: โดยรวมแล้ว คุณพอใจกับชีวิตหรือไม่?",
+          "type": "radio",
+          "required": false,
+          "tool": "TGDS_15",
+          "options": [
+            {
+              "value": 1,
+              "label": "ใช่"
+            },
+            {
+              "value": 0,
+              "label": "ไม่ใช่"
+            }
+          ]
+        },
+        {
+          "id": "N.tgds_2",
+          "label": "TGDS 2: คุณเลิกทำกิจกรรมหรืองานอดิเรกที่ชอบแล้วหรือไม่?",
+          "type": "radio",
+          "required": false,
+          "tool": "TGDS_15",
+          "options": [
+            {
+              "value": 1,
+              "label": "ใช่"
+            },
+            {
+              "value": 0,
+              "label": "ไม่ใช่"
+            }
+          ]
+        },
+        {
+          "id": "N.tgds_3",
+          "label": "TGDS 3: คุณรู้สึกว่าชีวิตว่างเปล่าหรือไม่?",
+          "type": "radio",
+          "required": false,
+          "tool": "TGDS_15",
+          "options": [
+            {
+              "value": 1,
+              "label": "ใช่"
+            },
+            {
+              "value": 0,
+              "label": "ไม่ใช่"
+            }
+          ]
+        },
+        {
+          "id": "N.tgds_4",
+          "label": "TGDS 4: คุณรู้สึกเบื่อบ่อยหรือไม่?",
+          "type": "radio",
+          "required": false,
+          "tool": "TGDS_15",
+          "options": [
+            {
+              "value": 1,
+              "label": "ใช่"
+            },
+            {
+              "value": 0,
+              "label": "ไม่ใช่"
+            }
+          ]
+        },
+        {
+          "id": "N.tgds_5",
+          "label": "TGDS 5: คุณมีจิตใจดีส่วนใหญ่หรือไม่?",
+          "type": "radio",
+          "required": false,
+          "tool": "TGDS_15",
+          "options": [
+            {
+              "value": 1,
+              "label": "ใช่"
+            },
+            {
+              "value": 0,
+              "label": "ไม่ใช่"
+            }
+          ]
+        },
+        {
+          "id": "N.tgds_6",
+          "label": "TGDS 6: คุณกังวลว่าจะมีเรื่องร้ายเกิดขึ้นหรือไม่?",
+          "type": "radio",
+          "required": false,
+          "tool": "TGDS_15",
+          "options": [
+            {
+              "value": 1,
+              "label": "ใช่"
+            },
+            {
+              "value": 0,
+              "label": "ไม่ใช่"
+            }
+          ]
+        },
+        {
+          "id": "N.tgds_7",
+          "label": "TGDS 7: คุณรู้สึกมีความสุขส่วนใหญ่หรือไม่?",
+          "type": "radio",
+          "required": false,
+          "tool": "TGDS_15",
+          "options": [
+            {
+              "value": 1,
+              "label": "ใช่"
+            },
+            {
+              "value": 0,
+              "label": "ไม่ใช่"
+            }
+          ]
+        },
+        {
+          "id": "N.tgds_8",
+          "label": "TGDS 8: คุณรู้สึกหมดหวังบ่อยครั้งหรือไม่?",
+          "type": "radio",
+          "required": false,
+          "tool": "TGDS_15",
+          "options": [
+            {
+              "value": 1,
+              "label": "ใช่"
+            },
+            {
+              "value": 0,
+              "label": "ไม่ใช่"
+            }
+          ]
+        },
+        {
+          "id": "N.tgds_9",
+          "label": "TGDS 9: คุณชอบอยู่บ้านมากกว่าออกไปข้างนอกหรือไม่?",
+          "type": "radio",
+          "required": false,
+          "tool": "TGDS_15",
+          "options": [
+            {
+              "value": 1,
+              "label": "ใช่"
+            },
+            {
+              "value": 0,
+              "label": "ไม่ใช่"
+            }
+          ]
+        },
+        {
+          "id": "N.tgds_10",
+          "label": "TGDS 10: คุณรู้สึกว่าความจำแย่กว่าคนส่วนใหญ่หรือไม่?",
+          "type": "radio",
+          "required": false,
+          "tool": "TGDS_15",
+          "options": [
+            {
+              "value": 1,
+              "label": "ใช่"
+            },
+            {
+              "value": 0,
+              "label": "ไม่ใช่"
+            }
+          ]
+        },
+        {
+          "id": "N.tgds_11",
+          "label": "TGDS 11: คุณคิดว่าการมีชีวิตอยู่เป็นสิ่งดีหรือไม่?",
+          "type": "radio",
+          "required": false,
+          "tool": "TGDS_15",
+          "options": [
+            {
+              "value": 1,
+              "label": "ใช่"
+            },
+            {
+              "value": 0,
+              "label": "ไม่ใช่"
+            }
+          ]
+        },
+        {
+          "id": "N.tgds_12",
+          "label": "TGDS 12: คุณรู้สึกไม่มีคุณค่าบ้างหรือไม่?",
+          "type": "radio",
+          "required": false,
+          "tool": "TGDS_15",
+          "options": [
+            {
+              "value": 1,
+              "label": "ใช่"
+            },
+            {
+              "value": 0,
+              "label": "ไม่ใช่"
+            }
+          ]
+        },
+        {
+          "id": "N.tgds_13",
+          "label": "TGDS 13: คุณรู้สึกมีพลังงานบ้างหรือไม่?",
+          "type": "radio",
+          "required": false,
+          "tool": "TGDS_15",
+          "options": [
+            {
+              "value": 1,
+              "label": "ใช่"
+            },
+            {
+              "value": 0,
+              "label": "ไม่ใช่"
+            }
+          ]
+        },
+        {
+          "id": "N.tgds_14",
+          "label": "TGDS 14: คุณรู้สึกว่าสถานการณ์ไม่มีหวังหรือไม่?",
+          "type": "radio",
+          "required": false,
+          "tool": "TGDS_15",
+          "options": [
+            {
+              "value": 1,
+              "label": "ใช่"
+            },
+            {
+              "value": 0,
+              "label": "ไม่ใช่"
+            }
+          ]
+        },
+        {
+          "id": "N.tgds_15",
+          "label": "TGDS 15: คุณคิดว่าคนอื่นดีกว่าคุณหรือไม่?",
+          "type": "radio",
+          "required": false,
+          "tool": "TGDS_15",
+          "options": [
+            {
+              "value": 1,
+              "label": "ใช่"
+            },
+            {
+              "value": 0,
+              "label": "ไม่ใช่"
+            }
+          ]
+        },
+        {
+          "id": "N.d1_glasses",
+          "label": "D.1★ จำนวนน้ำที่ดื่มต่อวัน (แก้ว, 1 แก้ว ≈ 250 มล.)",
+          "type": "number",
+          "min": 0,
+          "max": 30,
+          "step": 0.5,
+          "required": false,
+          "tool": "D1_WATER"
+        },
+        {
+          "id": "N.d2_variety",
+          "label": "D.2★ ความหลากหลายอาหาร — ประเภทอาหาร",
+          "type": "radio",
+          "required": false,
+          "tool": "D2_DIET",
+          "options": [
+            {
+              "value": 0,
+              "label": "0 — กินซ้ำทุกวัน"
+            },
+            {
+              "value": 1,
+              "label": "1 — มีบ้าง"
+            },
+            {
+              "value": 2,
+              "label": "2 — หลากหลายพอสมควร"
+            },
+            {
+              "value": 3,
+              "label": "3 — หลากหลายมาก"
+            }
+          ]
+        },
+        {
+          "id": "N.d2_regularity",
+          "label": "D.2★ ความหลากหลายอาหาร — ความสม่ำเสมอ",
+          "type": "radio",
+          "required": false,
+          "tool": "D2_DIET",
+          "options": [
+            {
+              "value": 0,
+              "label": "0 — ไม่สม่ำเสมอ"
+            },
+            {
+              "value": 1,
+              "label": "1 — บางครั้ง"
+            },
+            {
+              "value": 2,
+              "label": "2 — สม่ำเสมอ"
+            },
+            {
+              "value": 3,
+              "label": "3 — สม่ำเสมอมาก"
+            }
+          ]
+        },
+        {
+          "id": "N.d2_completeness",
+          "label": "D.2★ ความหลากหลายอาหาร — ครบ 5 หมู่",
+          "type": "radio",
+          "required": false,
+          "tool": "D2_DIET",
+          "options": [
+            {
+              "value": 0,
+              "label": "0 — ไม่ครบ"
+            },
+            {
+              "value": 1,
+              "label": "1 — ครบบางมื้อ"
+            },
+            {
+              "value": 2,
+              "label": "2 — ครบส่วนใหญ่"
+            },
+            {
+              "value": 3,
+              "label": "3 — ครบทุกมื้อ"
+            }
+          ]
+        },
+        {
+          "id": "N.d3_current",
+          "label": "D.3★ ปริมาณอาหารต่อมื้อ — ปัจจุบัน (1=น้อยมาก, 5=เต็มจาน)",
+          "type": "radio",
+          "required": false,
+          "tool": "D3_PORTION",
+          "options": [
+            {
+              "value": 1,
+              "label": "1 — น้อยกว่า ¼ จาน"
+            },
+            {
+              "value": 2,
+              "label": "2 — ¼–½ จาน"
+            },
+            {
+              "value": 3,
+              "label": "3 — ครึ่งจาน"
+            },
+            {
+              "value": 4,
+              "label": "4 — ¾ จาน"
+            },
+            {
+              "value": 5,
+              "label": "5 — เต็มจาน"
+            }
+          ]
+        },
+        {
+          "id": "N.d4_meals",
+          "label": "D.4★ จำนวนมื้ออาหารต่อวัน",
+          "type": "radio",
+          "required": false,
+          "tool": "D4_MEALS",
+          "options": [
+            {
+              "value": 1,
+              "label": "1 มื้อ"
+            },
+            {
+              "value": 2,
+              "label": "2 มื้อ"
+            },
+            {
+              "value": 3,
+              "label": "3 มื้อ"
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "tools": {
+    "AAI": {
+      "questions": [
+        "G.aai_q1",
+        "G.aai_q2",
+        "G.aai_q3",
+        "G.aai_q4",
+        "G.aai_q5",
+        "G.aai_q6",
+        "G.aai_q7",
+        "G.aai_q8"
+      ],
+      "project": "general"
+    },
+    "EQ5D": {
+      "questions": [
+        "F.eq5d_1",
+        "F.eq5d_2",
+        "F.eq5d_3",
+        "F.eq5d_4",
+        "F.eq5d_5"
+      ],
+      "project": "fall"
+    },
+    "EQ_VAS": {
+      "questions": [
+        "F.eq_vas"
+      ],
+      "project": "fall"
+    },
+    "HEARING": {
+      "questions": [
+        "F.hearing"
+      ],
+      "project": "fall"
+    },
+    "VISION": {
+      "questions": [
+        "F.vision_1",
+        "F.vision_2",
+        "F.vision_3",
+        "F.vision_4",
+        "F.vision_5"
+      ],
+      "project": "fall"
+    },
+    "FRAIL": {
+      "questions": [
+        "F.frail_1",
+        "F.frail_2",
+        "F.frail_3",
+        "F.frail_4",
+        "F.frail_5"
+      ],
+      "project": "fall"
+    },
+    "FES_I": {
+      "questions": [
+        "F.fesi_1",
+        "F.fesi_2",
+        "F.fesi_3",
+        "F.fesi_4",
+        "F.fesi_5",
+        "F.fesi_6",
+        "F.fesi_7"
+      ],
+      "project": "fall"
+    },
+    "BARTHEL": {
+      "questions": [
+        "F.barthel_1",
+        "F.barthel_2",
+        "F.barthel_3",
+        "F.barthel_4",
+        "F.barthel_5",
+        "F.barthel_6",
+        "F.barthel_7",
+        "F.barthel_8",
+        "F.barthel_9",
+        "F.barthel_10"
+      ],
+      "project": "fall"
+    },
+    "LIADL": {
+      "questions": [
+        "F.liadl_1",
+        "F.liadl_2",
+        "F.liadl_3",
+        "F.liadl_4",
+        "F.liadl_5",
+        "F.liadl_6",
+        "F.liadl_7",
+        "F.liadl_8"
+      ],
+      "project": "fall"
+    },
+    "ENVIRONMENT": {
+      "questions": [
+        "F.env_1",
+        "F.env_2",
+        "F.env_3",
+        "F.env_4",
+        "F.env_5",
+        "F.env_6",
+        "F.env_7",
+        "F.env_8",
+        "F.env_9"
+      ],
+      "project": "fall"
+    },
+    "MINI_COG": {
+      "questions": [
+        "F.minicog_clock",
+        "F.minicog_recall"
+      ],
+      "project": "fall"
+    },
+    "TUG": {
+      "questions": [
+        "F.tug_seconds"
+      ],
+      "project": "fall"
+    },
+    "STS5": {
+      "questions": [
+        "F.sts5_seconds"
+      ],
+      "project": "fall"
+    },
+    "BMD_FRAX": {
+      "questions": [
+        "B.frax_category"
+      ],
+      "project": "bmd"
+    },
+    "BMD_HEIGHT": {
+      "questions": [
+        "B.height_prev",
+        "G.height_current"
+      ],
+      "project": "bmd"
+    },
+    "BMD_B1": {
+      "questions": [
+        "B.fracture_risk_scale"
+      ],
+      "project": "bmd"
+    },
+    "BMD_B2": {
+      "questions": [
+        "B.wound_grade"
+      ],
+      "project": "bmd"
+    },
+    "ORAL_HEALTH": {
+      "questions": [
+        "N.oral_1",
+        "N.oral_2",
+        "N.oral_3",
+        "N.oral_4",
+        "N.oral_5",
+        "N.oral_6"
+      ],
+      "project": "nutrition"
+    },
+    "MNA_SF": {
+      "questions": [
+        "N.mna_1",
+        "N.mna_2",
+        "N.mna_3",
+        "N.mna_4",
+        "N.mna_5",
+        "N.mna_6a",
+        "N.mna_6b",
+        "G.bmi",
+        "G.cc_right"
+      ],
+      "project": "nutrition"
+    },
+    "TGDS_15": {
+      "questions": [
+        "N.tgds_1",
+        "N.tgds_2",
+        "N.tgds_3",
+        "N.tgds_4",
+        "N.tgds_5",
+        "N.tgds_6",
+        "N.tgds_7",
+        "N.tgds_8",
+        "N.tgds_9",
+        "N.tgds_10",
+        "N.tgds_11",
+        "N.tgds_12",
+        "N.tgds_13",
+        "N.tgds_14",
+        "N.tgds_15"
+      ],
+      "project": "nutrition"
+    },
+    "D1_WATER": {
+      "questions": [
+        "N.d1_glasses"
+      ],
+      "project": "nutrition"
+    },
+    "D2_DIET": {
+      "questions": [
+        "N.d2_variety",
+        "N.d2_regularity",
+        "N.d2_completeness"
+      ],
+      "project": "nutrition"
+    },
+    "D3_PORTION": {
+      "questions": [
+        "N.d3_current"
+      ],
+      "project": "nutrition"
+    },
+    "D4_MEALS": {
+      "questions": [
+        "N.d4_meals"
+      ],
+      "project": "nutrition"
+    }
+  }
+}

@@ -1,0 +1,523 @@
+/* ── NEDP guide website (/manual) — design layer ─────────────────────────────
+   Extracted from the Claude Design concept (NEDP Guide.dc.html) into semantic
+   classes bound to the app's NEDP tokens (app/globals.css). Full-bleed, chrome-
+   free, Thai-first. Motion (GSAP scroll reveals + three.js hero) is layered on
+   in components/manual/*. Prefixed `mn-` to avoid colliding with the app shell. */
+
+.mn-root {
+  width: 100%;
+  overflow-x: clip;
+  background: var(--page);
+  color: var(--text-primary);
+  font-family: var(--font-body), "Noto Sans Thai", sans-serif;
+
+  /* Manual-scoped accent tints. These render on the page canvas (KPI/report/bell icons,
+     brand mark), so they need a lighter value in dark mode for contrast — the old hardcoded
+     #1a56db/#6d28d9/#0e9f6e had no dark variant. (The always-light LINE-mock cards keep their
+     own literal colors on purpose.) */
+  --mn-blue: #1a56db;
+  --mn-violet: #6d28d9;
+  --mn-green: #0e9f6e;
+}
+:root.dark .mn-root {
+  --mn-blue: #6ea0ff;
+  --mn-violet: #b794f6;
+  --mn-green: #34d399;
+}
+
+/* sticky top nav */
+.mn-nav {
+  position: sticky;
+  top: 0;
+  z-index: 50;
+  width: 100%;
+  backdrop-filter: blur(14px);
+  -webkit-backdrop-filter: blur(14px);
+  background: color-mix(in srgb, var(--page) 82%, transparent);
+  border-bottom: 1px solid var(--border);
+}
+.mn-nav-inner {
+  max-width: 1280px;
+  margin: 0 auto;
+  display: flex;
+  align-items: center;
+  gap: 18px;
+  padding: 12px clamp(18px, 4vw, 44px);
+}
+.mn-nav-links {
+  flex: 1 1 auto;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  overflow-x: auto;
+  justify-content: flex-end;
+}
+.mn-nav-link {
+  flex: 0 0 auto;
+  padding: 8px 12px;
+  border-radius: 999px;
+  font-size: 15px;
+  font-weight: 600;
+  color: var(--text-secondary);
+  text-decoration: none;
+  white-space: nowrap;
+  transition: background 0.15s, color 0.15s;
+}
+.mn-nav-link:hover { background: var(--surface-2); color: var(--text-primary); }
+.mn-nav-link.is-active { background: var(--accent-soft); color: var(--text-accent); }
+
+.mn-iconbtn {
+  flex: 0 0 auto;
+  width: 40px;
+  height: 40px;
+  border-radius: 999px;
+  border: 1px solid var(--border);
+  background: var(--surface-1);
+  color: var(--text-primary);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* hide scrollbars on the horizontal nav strip */
+.mn-scroll::-webkit-scrollbar { height: 0; width: 0; display: none; }
+.mn-scroll { scrollbar-width: none; -ms-overflow-style: none; }
+
+/* sections */
+.mn-section {
+  width: 100%;
+  padding: clamp(48px, 7vw, 104px) clamp(20px, 5vw, 64px);
+  scroll-margin-top: 80px;
+}
+.mn-section--alt {
+  background: var(--surface-1);
+  border-top: 1px solid var(--border);
+  border-bottom: 1px solid var(--border);
+}
+.mn-wrap { max-width: 1200px; margin: 0 auto; }
+.mn-wrap--narrow { max-width: 1120px; margin: 0 auto; }
+
+/* two-column split: media + text */
+.mn-split {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: clamp(32px, 5vw, 72px);
+  justify-content: center;
+}
+.mn-col-media { flex: 0 1 320px; min-width: 280px; display: flex; justify-content: center; }
+.mn-col-text { flex: 1 1 440px; min-width: min(100%, 360px); }
+
+/* type */
+.mn-eyebrow {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 14px;
+  font-weight: 700;
+  /* No letter-spacing/uppercase: this label is Thai, and tracking separates Thai clusters from their marks. */
+  color: var(--text-accent);
+  white-space: nowrap;
+}
+.mn-eyebrow .mn-num { opacity: 0.5; }
+.mn-eyebrow-dot { width: 7px; height: 7px; border-radius: 999px; background: var(--accent); }
+.mn-h2 {
+  margin: 14px 0 0;
+  font-family: var(--font-display), sans-serif;
+  font-weight: 700;
+  line-height: 1.32;
+  letter-spacing: -0.01em;
+  font-size: clamp(31px, 4.2vw, 52px);
+  text-wrap: balance;
+}
+.mn-lead {
+  margin: 16px 0 0;
+  font-size: clamp(18px, 1.35vw, 21px);
+  line-height: 1.62;
+  color: var(--text-secondary);
+  text-wrap: pretty;
+}
+.mn-lead strong { color: var(--text-primary); }
+
+/* device frame (bezel is always black in both themes) */
+.mn-phone {
+  position: relative;
+  width: clamp(240px, 28vw, 300px);
+  border-radius: 44px;
+  background: #0a0a0a;
+  padding: 9px;
+  box-shadow: 0 40px 80px -34px rgba(10, 10, 20, 0.45), 0 0 0 1px rgba(0, 0, 0, 0.05);
+}
+.mn-phone-screen { border-radius: 36px; overflow: hidden; background: #fff; position: relative; }
+.mn-phone-screen img { width: 100%; height: auto; display: block; }
+/* In dark the black bezel equals --page, so add a light ring + wide soft glow so the light-mode
+   screenshot reads as a deliberate device, not a floating white rectangle. */
+:root.dark .mn-phone {
+  box-shadow:
+    0 30px 70px -34px rgba(0, 0, 0, 0.7),
+    0 0 0 1px rgba(255, 255, 255, 0.14),
+    0 0 90px -18px color-mix(in srgb, var(--accent) 28%, transparent);
+}
+
+/* generic bordered card + chips + kpi */
+.mn-card {
+  padding: 16px;
+  border: 1px solid var(--border);
+  border-radius: 16px;
+  background: var(--surface-1);
+}
+.mn-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  padding: 7px 14px;
+  border-radius: 999px;
+  font-size: 15px;
+  font-weight: 600;
+  color: var(--text-secondary);
+  background: var(--surface-2);
+  white-space: nowrap;
+}
+.mn-chip--accent { background: var(--accent-soft); color: var(--text-accent); font-weight: 700; }
+.mn-chip--outline { background: transparent; border: 1px solid var(--border); }
+
+.mn-cta {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  padding: 15px 28px;
+  border-radius: 999px;
+  background: var(--accent);
+  color: var(--on-accent);
+  font-weight: 700;
+  font-size: 18px;
+  text-decoration: none;
+  border: none;
+  cursor: pointer;
+  box-shadow: 0 10px 24px -10px color-mix(in srgb, var(--accent) 70%, transparent);
+}
+.mn-cta--ghost {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 15px 22px;
+  border-radius: 999px;
+  background: transparent;
+  border: 1px solid var(--border);
+  color: var(--text-primary);
+  font-weight: 600;
+  font-size: 17px;
+  text-decoration: none;
+  white-space: nowrap;
+}
+
+.mn-grid-auto {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+  gap: 14px;
+}
+.mn-kpi { padding: 18px; border: 1px solid var(--border); border-radius: 18px; background: var(--surface-1); }
+.mn-kpi-num { margin-top: 12px; font-size: 32px; font-weight: 700; line-height: 1; font-family: var(--font-display), sans-serif; }
+.mn-kpi-label { margin-top: 6px; font-size: 15px; color: var(--text-muted); font-weight: 600; }
+.mn-kpi-ico { width: 38px; height: 38px; border-radius: 11px; display: flex; align-items: center; justify-content: center; }
+
+/* GSAP reveal: JS sets the initial hidden state (useLayoutEffect) so no FOUC; under
+   reduced-motion the component skips animation and content shows normally.
+   NOTE: no permanent `will-change` here — GSAP promotes a layer only for the duration of the
+   tween and clears it after. A permanent will-change keeps the block (incl. the phone screenshots
+   inside split sections) on a composited texture that renders slightly soft. */
+
+/* brand mark in the nav / footer */
+.mn-nav-brand { display: flex; align-items: center; gap: 11px; text-decoration: none; flex: 0 0 auto; }
+.mn-brand-n {
+  width: 36px; height: 36px; border-radius: 9px;
+  background: var(--mn-blue); color: #fff;
+  display: flex; align-items: center; justify-content: center;
+  font-weight: 700; font-size: 20px; font-family: var(--font-inter), sans-serif;
+}
+.mn-brand-name { display: flex; flex-direction: column; line-height: 1.15; }
+
+/* hero */
+.mn-hero {
+  max-width: 1240px; margin: 0 auto;
+  display: flex; flex-wrap: wrap; align-items: center;
+  gap: clamp(36px, 5vw, 80px); justify-content: center;
+}
+.mn-hero-copy { flex: 1 1 440px; min-width: min(100%, 340px); }
+.mn-hero-title {
+  margin: 18px 0 0; font-weight: 700; letter-spacing: -0.02em; line-height: 1;
+  font-size: clamp(56px, 9vw, 120px); font-family: var(--font-display), sans-serif;
+}
+.mn-hero-sub { margin: 6px 0 0; font-weight: 700; line-height: 1.32; letter-spacing: -0.01em; font-size: clamp(30px, 4.6vw, 58px); }
+.mn-hero-lead { margin: 22px 0 0; max-width: 30em; font-size: clamp(18px, 1.5vw, 22px); line-height: 1.6; color: var(--text-secondary); text-wrap: pretty; }
+.mn-hero-cta { margin: 30px 0 0; display: flex; flex-wrap: wrap; align-items: center; gap: 14px; }
+
+/* hero stat strip — the executive "why this matters" row */
+.mn-hero-stats {
+  margin: 36px 0 0;
+  display: flex; flex-wrap: wrap;
+  gap: clamp(18px, 3vw, 40px);
+  padding-top: 22px;
+  border-top: 1px solid var(--border);
+}
+.mn-hero-stat { display: flex; flex-direction: column; gap: 4px; min-width: 130px; flex: 1 1 130px; }
+.mn-hero-stat strong {
+  font-family: var(--font-display), sans-serif;
+  font-size: clamp(27px, 2.9vw, 38px); font-weight: 700; line-height: 1;
+  color: var(--text-primary); letter-spacing: -0.01em;
+}
+.mn-hero-stat span { font-size: 15px; line-height: 1.5; color: var(--text-muted); font-weight: 600; }
+.mn-hero-media { flex: 0 1 460px; min-width: 300px; position: relative; display: flex; justify-content: center; align-items: center; min-height: 380px; }
+.mn-hero-glow { position: absolute; inset: -6% -4%; border-radius: 36px; background: radial-gradient(120% 90% at 70% 15%, color-mix(in srgb, var(--accent) 12%, transparent), transparent 60%); }
+.mn-hero-3d { position: absolute; inset: 0; z-index: 1; pointer-events: none; }
+.mn-hero-phone { position: relative; z-index: 2; width: clamp(230px, 26vw, 290px); }
+
+/* small helpers */
+.mn-bar { margin-top: 10px; height: 6px; border-radius: 999px; background: var(--surface-2); overflow: hidden; }
+.mn-bar > i { display: block; height: 100%; background: var(--accent); border-radius: 999px; }
+.mn-list { margin: 20px 0 0; padding: 0; list-style: none; display: flex; flex-direction: column; gap: 10px; }
+.mn-list li { display: flex; gap: 10px; align-items: flex-start; font-size: 16.5px; line-height: 1.55; color: var(--text-secondary); }
+.mn-list strong { color: var(--text-primary); }
+.mn-dot { flex: 0 0 auto; width: 6px; height: 6px; border-radius: 999px; background: var(--accent); margin-top: 8px; }
+.mn-figure-card { margin: 0; border-radius: 24px; overflow: hidden; border: 1px solid var(--border); box-shadow: 0 30px 60px -34px rgba(10, 10, 20, 0.4); background: #000; }
+.mn-figure-card img { width: 100%; height: auto; display: block; }
+.mn-figcap { margin: 12px 2px 0; font-size: 14.5px; color: var(--text-muted); }
+.mn-callout {
+  margin: 12px 0 0; display: inline-flex; align-items: flex-start; gap: 8px;
+  padding: 10px 14px; border-radius: 12px; background: var(--accent-soft);
+  color: var(--text-accent); font-size: 15px; font-weight: 600; line-height: 1.5;
+}
+
+/* ── StickyPhone (the #submit phone-content crossfade) ─────────────────────── */
+.mn-sticky { display: flex; flex-direction: column; gap: 8px; }
+.mn-sticky-phonecol { display: none; }
+
+.mn-sticky-steps { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 30px; }
+.mn-sticky-step { display: flex; gap: 14px; align-items: flex-start; }
+.mn-step-num {
+  flex: 0 0 auto;
+  width: 30px; height: 30px;
+  border-radius: 999px;
+  background: var(--accent-soft);
+  color: var(--text-accent);
+  font-weight: 700; font-size: 15px;
+  display: flex; align-items: center; justify-content: center;
+  font-family: var(--font-inter), sans-serif;
+}
+.mn-step-body { min-width: 0; }
+.mn-step-cap { font-weight: 700; font-size: 17px; line-height: 1.5; color: var(--text-primary); }
+.mn-step-phone { width: min(230px, 68vw); margin-top: 14px; }
+
+.mn-sticky-phone { transform-style: preserve-3d; }
+.mn-sticky-phone .mn-phone-screen { aspect-ratio: 390 / 844; }
+.mn-sticky-img {
+  position: absolute; inset: 0;
+  width: 100%; height: 100%;
+  object-fit: cover; object-position: top center;
+  opacity: 0;
+  backface-visibility: hidden;
+}
+.mn-sticky-img.is-on { opacity: 1; }
+/* The step-to-step MORPH (scroll-driven mode only). Done in CSS on purpose: CSS transitions always
+   redirect to the current target, so a morph interrupted by fast scrolling can never strand the phone
+   on the wrong / half-faded screenshot, and the settled screen is at scale 1 (native-resolution sharp).
+   The fade is ASYMMETRIC to avoid the muddy "double-exposure" a slow symmetric crossfade leaves in the
+   middle (two different screenshots blended at ~50/50): the OUTGOING screen recedes & clears out fast,
+   then the INCOMING screen zoom-settles in gently after a short delay — so the two are never both
+   half-visible at once, and the incoming reads as a deliberate, unhurried morph. Because both
+   screenshots sit on the same near-white screen background, the brief handoff reads as a clean refresh,
+   not a gap. Under reduced-motion this @media block is skipped, so the screen swaps INSTANTLY (no fade/
+   zoom); the scroll-morph itself runs at all widths (desktop 2-col, mobile pinned-top). */
+@media (prefers-reduced-motion: no-preference) {
+  .mn-sticky.is-scrolly .mn-sticky-img {
+    transform: scale(1.06) translateY(-1.2%);
+    transform-origin: 50% 42%;
+    transition: opacity 0.24s ease-out, transform 0.42s ease-out; /* outgoing: quick, clean exit */
+  }
+  .mn-sticky.is-scrolly .mn-sticky-img.is-on {
+    transform: scale(1) translateY(0);
+    transition: opacity 0.6s ease 0.16s, transform 0.82s cubic-bezier(0.22, 1, 0.36, 1); /* incoming: slow, delayed settle */
+  }
+}
+
+/* step progress dots under the sticky phone (scroll-driven mode only) */
+.mn-sticky-dots { display: none; }
+.mn-sticky.is-scrolly .mn-sticky-dots {
+  display: flex; justify-content: center; gap: 8px; margin-top: 16px;
+}
+.mn-sticky-dots i {
+  width: 8px; height: 8px; border-radius: 999px;
+  background: var(--border); transition: background 0.3s ease, transform 0.3s ease;
+}
+.mn-sticky-dots i.is-on { background: var(--accent); transform: scale(1.25); }
+
+/* elaborated step instructions (both modes) */
+.mn-step-detail {
+  margin: 8px 0 0; max-width: 34em;
+  font-size: 16px; line-height: 1.62; color: var(--text-secondary);
+  text-wrap: pretty;
+}
+
+/* scroll-driven mode — now runs at ALL widths (SSR renders the filmstrip; the client upgrades to
+   is-scrolly). Shared bits here; the desktop 2-column vs mobile pinned-top layouts are in the queries. */
+.mn-sticky.is-scrolly .mn-sticky-phonecol { display: block; }
+.mn-sticky.is-scrolly .mn-step-phone { display: none; }
+.mn-sticky.is-scrolly .mn-sticky-steps { gap: 0; }
+.mn-sticky.is-scrolly .mn-sticky-step { opacity: 0.55; transition: opacity 0.35s ease; }
+.mn-sticky.is-scrolly .mn-sticky-step.is-active { opacity: 1; }
+
+/* MOBILE (<900px): the phone pins as an opaque, full-width top bar; step captions scroll beneath it and
+   the phone content swaps as each step passes its trigger. The page-coloured bar hides steps behind it. */
+@media (max-width: 899.98px) {
+  .mn-sticky.is-scrolly { display: block; }
+  .mn-sticky.is-scrolly .mn-sticky-phonecol {
+    position: sticky; top: 50px; z-index: 3;
+    width: 100%;
+    background: var(--page);
+    padding: 4px 0 12px;
+    display: flex; flex-direction: column; align-items: center;
+  }
+  .mn-sticky.is-scrolly .mn-sticky-phone { width: min(156px, 40vw); }
+  .mn-sticky.is-scrolly .mn-sticky-steps { margin-top: 6px; }
+  .mn-sticky.is-scrolly .mn-sticky-step { min-height: 60vh; align-items: flex-start; }
+}
+
+/* DESKTOP (≥900px): a sticky phone column beside the scrolling steps. */
+@media (min-width: 900px) {
+  .mn-sticky.is-scrolly {
+    display: grid;
+    grid-template-columns: minmax(280px, 340px) 1fr;
+    gap: clamp(40px, 6vw, 96px);
+    align-items: start;
+  }
+  .mn-sticky.is-scrolly .mn-sticky-phonecol { position: sticky; top: 14vh; }
+  .mn-sticky.is-scrolly .mn-sticky-step { min-height: 64vh; align-items: center; }
+}
+
+/* contact card — premium black in light; in dark #0a0a0a equals --page, so lift it to a distinct charcoal */
+.mn-contact-card { background: #0a0a0a; color: #fff; border: 1px solid var(--border); border-radius: 24px; }
+:root.dark .mn-contact-card { background: #1a1a1a; border-color: #2f2f2f; }
+
+/* folder-path breadcrumb (ส่งข้อมูล) */
+.mn-path { margin-top: 22px; display: flex; flex-wrap: wrap; align-items: center; gap: 6px; }
+.mn-path-node {
+  padding: 6px 12px; border-radius: 999px;
+  background: var(--surface-2); color: var(--text-secondary);
+  font-size: 14.5px; font-weight: 600; white-space: nowrap;
+}
+.mn-path-node--accent { background: var(--accent-soft); color: var(--text-accent); font-weight: 700; }
+.mn-path-sep { color: var(--text-muted); flex: 0 0 auto; }
+
+/* ตำบล-hub 3-tab explainer */
+.mn-hub { margin-top: 30px; }
+.mn-hub-title { font-size: 14px; font-weight: 700; color: var(--text-muted); margin-bottom: 12px; }
+.mn-hub-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(210px, 1fr)); gap: 12px; }
+.mn-hub-card-title { font-weight: 700; font-size: 17px; }
+.mn-hub-card-desc { margin-top: 6px; font-size: 15px; line-height: 1.5; color: var(--text-muted); }
+
+/* jump-to-next-section link */
+.mn-jump {
+  margin-top: 24px; display: inline-flex; align-items: center; gap: 8px;
+  font-weight: 700; font-size: 17px; color: var(--text-accent); text-decoration: none;
+}
+.mn-jump:hover { text-decoration: underline; }
+
+/* InteractivePhone — screenshot with its captured nav cropped, replaced by a live clickable nav.
+   The screen stays light (the captures are of the light app) regardless of page theme. */
+.mn-iphone-screen { aspect-ratio: 390 / 844; display: flex; flex-direction: column; background: #fff; }
+.mn-iphone-shot { position: relative; flex: 1 1 auto; overflow: hidden; }
+.mn-iphone-shot img {
+  position: absolute; inset: 0;
+  width: 100%; height: 100%;
+  object-fit: cover; object-position: top center;
+  opacity: 0;
+}
+.mn-iphone-shot img.is-on { opacity: 1; }
+/* incoming screen slides up a touch as it fades in — translate only (no scale) so the resting
+   image composites at native resolution and stays crisp. Skipped under reduced-motion. */
+@media (prefers-reduced-motion: no-preference) {
+  .mn-iphone-shot img { transition: opacity 0.35s ease, transform 0.35s ease; transform: translateY(10px); }
+  .mn-iphone-shot img.is-on { transform: none; }
+}
+.mn-iphone-nav {
+  flex: 0 0 auto; height: 11%; min-height: 46px;
+  display: flex; align-items: center; justify-content: space-around; gap: 2px;
+  padding: 0 4px;
+  background: #ffffff; border-top: 1px solid #ececec;
+}
+.mn-iphone-tab {
+  position: relative;
+  display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 2px;
+  flex: 1 1 0; min-width: 0; padding: 2px;
+  border: none; background: none; cursor: pointer;
+  color: #8a8a8c; font-family: inherit; font-size: 9.5px; font-weight: 600; line-height: 1;
+  transition: color 0.2s ease;
+}
+/* active-tab indicator bar (slides in on top edge of the live nav) */
+.mn-iphone-tab::after {
+  content: ""; position: absolute; top: -1px; left: 26%; right: 26%; height: 2px;
+  border-radius: 2px; background: #0a9d78; transform: scaleX(0); transform-origin: center;
+}
+.mn-iphone-tab.is-active::after { transform: scaleX(1); }
+@media (prefers-reduced-motion: no-preference) {
+  .mn-iphone-tab::after { transition: transform 0.28s ease; }
+}
+.mn-iphone-tab span { white-space: nowrap; }
+.mn-iphone-tab:hover { color: #0a9d78; }
+.mn-iphone-tab.is-active { color: #0a9d78; }
+.mn-iphone-tab--more { cursor: default; opacity: 0.75; }
+.mn-iphone-tab--more:hover { color: #8a8a8c; }
+
+/* ── ฟังก์ชันทั้งหมด — feature-index grid (comprehensive backstop) ─────────────── */
+.mn-findex {
+  margin-top: 26px;
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(238px, 1fr));
+  gap: clamp(16px, 2.2vw, 28px);
+}
+.mn-findex-col { min-width: 0; }
+.mn-findex-head {
+  display: flex; align-items: center; gap: 9px;
+  font-weight: 700; font-size: 17px; color: var(--text-primary);
+  padding-bottom: 10px; margin-bottom: 10px;
+  border-bottom: 1px solid var(--border);
+}
+.mn-findex-ico {
+  flex: 0 0 auto; width: 30px; height: 30px; border-radius: 9px;
+  display: flex; align-items: center; justify-content: center;
+  background: var(--accent-soft); color: var(--text-accent);
+}
+.mn-findex-list { margin: 0; padding: 0; list-style: none; display: flex; flex-direction: column; gap: 8px; }
+.mn-findex-list li {
+  display: flex; gap: 9px; align-items: flex-start;
+  font-size: 15px; line-height: 1.5; color: var(--text-secondary);
+}
+.mn-findex-dot { flex: 0 0 auto; width: 5px; height: 5px; border-radius: 999px; background: var(--accent); margin-top: 8px; }
+
+/* ── OA add-friend block (inside the dark contact card) ───────────────────────── */
+.mn-oa {
+  margin-top: 12px;
+  display: flex; gap: 16px; align-items: center;
+  padding: 14px; border-radius: 16px;
+  background: rgba(255, 255, 255, 0.06);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+}
+.mn-oa-qr { flex: 0 0 auto; background: #fff; border-radius: 12px; padding: 8px; line-height: 0; }
+.mn-oa-qr img { width: 104px; height: 104px; display: block; border-radius: 4px; }
+@media (max-width: 420px) {
+  .mn-oa { flex-direction: column; align-items: flex-start; }
+}
+
+/* Mobile: keep section navigation — the links wrap to a second row as a swipeable chip strip
+   (previously they were hidden entirely, leaving phones with no way to jump between sections). */
+@media (max-width: 640px) {
+  .mn-nav-inner { flex-wrap: wrap; row-gap: 0; padding-top: 10px; padding-bottom: 8px; }
+  .mn-nav-links {
+    order: 3; flex-basis: 100%;
+    justify-content: flex-start;
+    margin-top: 6px; padding-bottom: 2px;
+  }
+  .mn-nav-link { padding: 9px 13px; font-size: 14px; background: var(--surface-2); }
+  .mn-nav-link + .mn-nav-link { margin-left: 2px; }
+}

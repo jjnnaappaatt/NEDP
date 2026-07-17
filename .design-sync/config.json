@@ -1,0 +1,33 @@
+{
+  "pkg": "aai-next-dashboard",
+  "globalName": "NEDP",
+  "projectId": "3c7c8d77-610f-485c-bf9d-970963d5ace5",
+  "shape": "package",
+  "srcDir": "components/ui",
+  "tsconfig": "tsconfig.json",
+  "extraEntries": ["./.design-sync/ds-extra.tsx"],
+  "componentSrcMap": {
+    "Button": "components/ui/Button.tsx",
+    "Badge": "components/ui/Badge.tsx",
+    "StatusBadge": "components/ui/Badge.tsx",
+    "Card": "components/ui/Card.tsx",
+    "IconBadge": "components/ui/IconBadge.tsx",
+    "Avatar": "components/ui/Avatar.tsx",
+    "Sheet": "components/ui/Sheet.tsx",
+    "PageSkeleton": "components/ui/PageSkeleton.tsx",
+    "StatCard": "components/dashboard/StatCard.tsx",
+    "BarTriple": "components/portal/BarTriple.tsx",
+    "SummaryBox": "components/portal/SummaryBox.tsx",
+    "DimensionHighlightCards": "components/portal/DimensionHighlightCards.tsx",
+    "DomainScoreInput": "components/portal/DomainScoreInput.tsx",
+    "AreaCard": "components/portal/AreaCard.tsx",
+    "AaiComparePanel": "components/portal/AaiComparePanel.tsx",
+    "ProjectMultiSelect": "components/portal/ProjectMultiSelect.tsx"
+  },
+  "cssEntry": ".design-sync/.cache/ds-compiled.css",
+  "readmeHeader": ".design-sync/conventions.md",
+  "overrides": {
+    "Sheet": { "cardMode": "single", "viewport": "680x500" },
+    "AaiComparePanel": { "viewport": "800x520" }
+  }
+}

@@ -1,0 +1,151 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<title>ดัชนีพฤฒพลัง AAI Dashboard</title>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Thai:wght@400;500;600;700&family=Inter:wght@400;500;600;700;800&family=IBM+Plex+Mono:wght@400;600&display=swap" rel="stylesheet">
+<style>
+/* App-matched theme. Neutrals mirror app/globals.css tokens; .dark is toggled onto this iframe's
+   <html> by components/manual/AaiDashboardFrame.tsx to follow the app's theme. Domain colours stay
+   distinct but harmonised, with brighter dark variants; soft tints use color-mix so they adapt. */
+:root{
+  --bg:#fafafa;--card:#fff;--surface2:#f3f4f4;--border:#e5e5e5;--track:#e5e5e5;
+  --text:#0a0a0a;--text2:#3a3a3c;--text3:#5a5a5c;--accent:#0f766e;--accent-soft:#def7f0;
+  --d1:#1a56db;--d1m:#7aa2f0;--d2:#6d28d9;--d2m:#b794f6;--d3:#0e9f6e;--d3m:#34d399;--d4:#c37d0d;--d4m:#e0a63c;
+  --radius:12px;--radius-sm:8px;
+  --font-th:'IBM Plex Sans Thai','Noto Sans Thai',sans-serif;--font-en:'Inter',var(--font-th);--font-mono:'IBM Plex Mono',ui-monospace,monospace;
+}
+html.dark{
+  --bg:#0a0a0a;--card:#161616;--surface2:#1f1f1f;--border:#2a2a2a;--track:#2a2a2a;
+  --text:#f5f5f5;--text2:#b3b3b3;--text3:#8a8a8a;--accent:#2dd4bf;--accent-soft:#0c2b25;
+  --d1:#6ea0ff;--d1m:#9dbcff;--d2:#b794f6;--d2m:#cdb4fb;--d3:#34d399;--d3m:#6ee7b7;--d4:#fbbf24;--d4m:#fcd34d;
+}
+*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
+body{font-family:var(--font-th);background:var(--bg);color:var(--text);line-height:1.5;-webkit-text-size-adjust:100%;overflow-x:hidden}
+.container{max-width:960px;margin:0 auto;padding:20px 16px 48px}
+.ios-banner,.ios-spacer{display:none}
+.header{text-align:center;padding:28px 0 20px}
+.header-tag{font-size:11px;font-weight:700;letter-spacing:3px;color:var(--accent);text-transform:uppercase;margin-bottom:6px;font-family:var(--font-en)}
+.header h1{font-size:26px;font-weight:700;color:var(--text);margin:0 0 4px}
+.header h1 span{color:var(--accent);font-family:var(--font-en)}
+.header p{font-size:13px;color:var(--text3)}
+.header-meta{display:flex;justify-content:center;gap:10px;margin-top:10px;flex-wrap:wrap}
+.header-meta span{font-size:11px;background:var(--accent-soft);color:var(--accent);padding:3px 10px;border-radius:20px;font-weight:600}
+.kpi-grid{display:grid;grid-template-columns:1.2fr 1fr 1fr 1fr 1fr;gap:10px;margin:16px 0}
+.kpi-main{background:linear-gradient(135deg,#0f172a,#134e4a 52%,#0f766e);border-radius:var(--radius);padding:20px 16px;display:flex;flex-direction:column;align-items:center;justify-content:center;position:relative;overflow:hidden}
+html.dark .kpi-main{background:linear-gradient(135deg,#04110f,#0f3d38 52%,#115e56)}
+.kpi-main .label{font-size:11px;color:#99f6e4;font-weight:700;letter-spacing:2px;font-family:var(--font-en)}
+.kpi-main .value{font-size:42px;font-weight:800;color:#fff;line-height:1;margin:4px 0;font-family:var(--font-en)}
+.kpi-main .diff{font-size:12px;font-weight:700}
+.kpi-main .diff.up{color:#86efac}.kpi-main .diff.down{color:#fca5a5}
+.kpi-domain{background:var(--card);border-radius:var(--radius);padding:12px 8px;display:flex;flex-direction:column;align-items:center;cursor:pointer;border:1.5px solid var(--border);transition:all .25s;-webkit-user-select:none;user-select:none}
+.kpi-domain:active{transform:scale(.97)}.kpi-domain.active{box-shadow:0 0 0 3px var(--accent-soft)}
+.kpi-domain .d-label{font-size:10px;font-weight:700;color:var(--text3);text-transform:uppercase;letter-spacing:.5px;font-family:var(--font-en)}
+.kpi-domain .d-contrib{font-size:10px;font-weight:600;opacity:.85;font-family:var(--font-en)}
+.stack-section{margin:12px 0 4px}.stack-label{font-size:12px;font-weight:700;color:var(--text2);margin-bottom:4px}
+.stack-bar{display:flex;height:28px;border-radius:var(--radius-sm);overflow:hidden;border:1px solid var(--border)}
+.stack-seg{display:flex;align-items:center;justify-content:center;overflow:hidden;transition:width .3s ease}
+.stack-seg span{font-size:11px;font-weight:700;color:#fff;white-space:nowrap;font-family:var(--font-en)}
+.stack-legend{display:flex;gap:14px;margin-top:6px;flex-wrap:wrap}
+.stack-legend .leg{display:flex;align-items:center;gap:4px;font-size:11px;color:var(--text2)}
+.stack-legend .dot{width:10px;height:10px;border-radius:2px}
+.panels{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-top:16px}
+.panel{background:var(--card);border-radius:var(--radius);border:1.5px solid var(--border);overflow:hidden;transition:all .3s}
+.panel.expanded{grid-column:1/-1}
+.panel-header{display:flex;align-items:center;gap:10px;padding:12px 16px;cursor:pointer;transition:background .2s;-webkit-user-select:none}
+.panel-header:active{background:var(--surface2)}
+.panel-dot{width:10px;height:10px;border-radius:50%;flex-shrink:0}
+.panel-info{flex:1}.panel-title{font-size:14px;font-weight:700}.panel-sub{font-size:11px;color:var(--text3)}
+.panel-score{text-align:right}.panel-score .ps-val{font-size:24px;font-weight:800;line-height:1;font-family:var(--font-en)}.panel-score .ps-contrib{font-size:11px;color:var(--text2)}
+.panel-chevron{font-size:14px;color:var(--text3);transition:transform .25s}.panel.expanded .panel-chevron{transform:rotate(180deg)}
+.sliders{padding:0 16px 16px}.sliders-grid{display:grid;gap:8px 20px}.sliders-grid.cols2{grid-template-columns:1fr 1fr}
+.slider-row{padding:10px 0;border-bottom:1px solid var(--border)}
+.slider-top{display:flex;justify-content:space-between;align-items:baseline;margin-bottom:6px}
+.slider-label{font-size:13px;font-weight:600;color:var(--text)}
+.slider-weight{font-size:11px;color:var(--text3);font-family:var(--font-mono)}
+.slider-control{display:flex;align-items:center;gap:10px}
+.slider-control input[type=range]{flex:1;height:44px;-webkit-appearance:none;appearance:none;background:transparent;cursor:pointer;outline:none;touch-action:pan-x;margin:0;padding:0}
+.slider-control input[type=range]::-webkit-slider-runnable-track{height:8px;border-radius:4px;background:var(--track)}
+.slider-control input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:28px;height:28px;border-radius:50%;border:3px solid var(--tc,var(--d1));background:var(--card);margin-top:-10px;box-shadow:0 2px 8px rgba(0,0,0,.18)}
+.slider-control input[type=range]::-moz-range-track{height:8px;border-radius:4px;background:var(--track);border:none}
+.slider-control input[type=range]::-moz-range-thumb{width:24px;height:24px;border-radius:50%;border:3px solid var(--tc,var(--d1));background:var(--card);box-shadow:0 2px 8px rgba(0,0,0,.18)}
+.slider-control input[type=number]{width:64px;text-align:center;font-size:14px;font-weight:700;border:1.5px solid var(--border);border-radius:8px;padding:6px 4px;font-family:var(--font-mono);outline:none;-webkit-appearance:none;height:40px;background:var(--card);color:var(--text)}
+.slider-control input[type=number]:focus{border-color:var(--tc,var(--d1))}
+.hbar{width:100%;height:14px;border-radius:7px;overflow:hidden;margin-top:6px;position:relative}
+.hbar-bg{position:absolute;inset:0;border-radius:7px}.hbar-fill{height:100%;border-radius:7px;transition:width .1s ease-out}
+.slider-weighted{font-size:11px;color:var(--text3);margin-top:4px;font-family:var(--font-mono)}
+.slider-weighted strong{font-weight:600}
+.formula-box{margin-top:10px;padding:10px 14px;background:var(--surface2);border-radius:var(--radius-sm);font-size:12px;color:var(--text2);line-height:1.8;border:1px solid var(--border);overflow-x:auto}
+.formula-box code{font-family:var(--font-mono);font-size:11px}
+.final-formula{margin-top:16px;padding:18px 20px;background:linear-gradient(135deg,#0f172a,#1e293b);border-radius:var(--radius);color:#fff}
+html.dark .final-formula{background:linear-gradient(135deg,#0d0d0d,#1c1c1c);border:1px solid var(--border)}
+.final-formula .ff-label{font-size:12px;font-weight:700;color:#94a3b8;margin-bottom:8px;letter-spacing:1px;font-family:var(--font-en)}
+.final-formula .ff-eq{font-family:var(--font-mono);font-size:12px;line-height:2;word-break:break-all}
+.final-formula .ff-result{font-size:22px;font-weight:800;color:#5eead4;font-family:var(--font-en)}
+.reset-area{text-align:center;margin-top:16px}
+.btn-reset{padding:10px 28px;font-size:14px;font-weight:700;color:var(--text2);background:var(--card);border:1.5px solid var(--border);border-radius:var(--radius-sm);cursor:pointer;font-family:var(--font-th)}
+.btn-reset:active{background:var(--surface2);transform:scale(.98)}
+.footer{text-align:center;margin-top:32px;padding-top:20px;border-top:1px solid var(--border)}.footer p{font-size:11px;color:var(--text3)}
+@media(max-width:700px){.kpi-grid{grid-template-columns:1fr 1fr}.kpi-main{grid-column:1/-1}.panels{grid-template-columns:1fr}.panel.expanded{grid-column:auto}.sliders-grid.cols2{grid-template-columns:1fr}.header h1{font-size:22px}.kpi-main .value{font-size:36px}}
+@media(max-width:400px){.kpi-grid{grid-template-columns:1fr 1fr;gap:8px}}
+</style>
+</head>
+<body>
+<div class="ios-banner" id="iosB"><h3>📱 เปิดใน Safari เพื่อใช้งานเต็มรูปแบบ</h3><p>Dashboard นี้ทำงานได้ดีที่สุดใน Safari / Chrome</p><div class="steps"><strong>วิธีเปิด:</strong><br>1. กดปุ่ม <strong>⋯</strong> (สามจุด) มุมขวาล่าง<br>2. เลือก <strong>"เปิดใน Safari"</strong> หรือ <strong>"Open in Safari"</strong><br>3. Slider จะลากได้ปกติทันที</div><button class="btn-d" onclick="document.getElementById('iosB').classList.remove('show');document.getElementById('iosS').classList.remove('show')">เข้าใจแล้ว ปิดแถบนี้</button></div>
+<div class="ios-spacer" id="iosS"></div>
+<div class="container" id="app"></div>
+<script>
+/* in-app "open in Safari" banner disabled for the /manual embed (runs inside an iframe on the app) */
+/* Mirror the embedding app's theme (same-origin parent) onto our own <html> BEFORE first paint, so
+   the cards/gauges/sliders are built in the correct theme rather than needing a recompute afterwards. */
+(function(){try{var p=window.parent;if(p&&p!==window&&p.document.documentElement.classList.contains('dark')){document.documentElement.classList.add('dark');document.documentElement.style.colorScheme='dark';}}catch(e){}})();
+var D=[{id:"employment",n:"การทำงาน",e:"Employment",w:.30,c:"var(--d1)",cl:"color-mix(in srgb,var(--d1) 14%,var(--card))",cm:"var(--d1m)",ind:[{id:"e1",l:"มีงานทำ 55-59",w:.50,d:76.9},{id:"e2",l:"มีงานทำ 60-64",w:.30,d:57.3},{id:"e3",l:"มีงานทำ 65-69",w:.15,d:44.9},{id:"e4",l:"มีงานทำ 70-74",w:.05,d:26.1}]},{id:"participation",n:"การมีส่วนร่วม",e:"Participation",w:.15,c:"var(--d2)",cl:"color-mix(in srgb,var(--d2) 14%,var(--card))",cm:"var(--d2m)",ind:[{id:"p1",l:"เข้าร่วมกลุ่ม/ชมรม",w:.30,d:36.7},{id:"p2",l:"ดูแลหลาน/ผู้ป่วย/ผู้สูงอายุ",w:.40,d:38.6},{id:"p3",l:"ร่วมวันสำคัญชุมชน",w:.30,d:49.4}]},{id:"health",n:"สุขภาพดีและความมั่นคง",e:"Independent Living",w:.30,c:"var(--d3)",cl:"color-mix(in srgb,var(--d3) 14%,var(--card))",cm:"var(--d3m)",ind:[{id:"h1",l:"ออกกำลังกาย",w:.10,d:40.0},{id:"h2",l:"บริการสุขภาพ/ช่วยเหลือ",w:.20,d:83.5},{id:"h3",l:"ทำกิจวัตรได้ดี (ADLs)",w:.25,d:74.5},{id:"h4",l:"รายได้เพียงพอ",w:.15,d:58.2},{id:"h5",l:"ไม่ขัดสนทางวัตถุ",w:.10,d:88.2},{id:"h6",l:"เจ้าของที่อยู่อาศัย",w:.20,d:79.5}]},{id:"capacity",n:"ศักยภาพและสภาพแวดล้อม",e:"Capacity",w:.25,c:"var(--d4)",cl:"color-mix(in srgb,var(--d4) 14%,var(--card))",cm:"var(--d4m)",ind:[{id:"c1",l:"อายุคาดเฉลี่ยที่ 60",w:.20,d:47.8},{id:"c2",l:"สัดส่วนปีสุขภาพดี",w:.30,d:74.9},{id:"c3",l:"สุขภาพจิตดี",w:.20,d:86.8},{id:"c4",l:"ติดต่อบุตรนอกครัวเรือน",w:.10,d:97.3},{id:"c5",l:"ใช้อินเทอร์เน็ต",w:.15,d:65.0},{id:"c6",l:"สำเร็จการศึกษา",w:.05,d:18.3}]}];
+var V={},exp="employment";
+function init(){V={};D.forEach(function(d){d.ind.forEach(function(i){V[i.id]=i.d})})}init();
+function calc(){var ds=D.map(function(d){return d.ind.reduce(function(s,i){return s+V[i.id]*i.w},0)});var ct=D.map(function(d,i){return ds[i]*d.w});return{ds:ds,ct:ct,aai:ct.reduce(function(a,b){return a+b},0)}}
+function gH(v,c,sz,sw){sz=sz||72;sw=sw||7;var r=(sz-sw)/2,ci=2*Math.PI*r,o=ci-(v/100)*ci;return'<svg width="'+sz+'" height="'+sz+'" viewBox="0 0 '+sz+' '+sz+'"><circle cx="'+sz/2+'" cy="'+sz/2+'" r="'+r+'" fill="none" stroke="var(--track)" stroke-width="'+sw+'"/><circle cx="'+sz/2+'" cy="'+sz/2+'" r="'+r+'" fill="none" stroke="'+c+'" stroke-width="'+sw+'" stroke-dasharray="'+ci+'" stroke-dashoffset="'+o+'" stroke-linecap="round" transform="rotate(-90 '+sz/2+' '+sz/2+')" style="transition:stroke-dashoffset .3s"/><text x="'+sz/2+'" y="'+(sz/2-2)+'" text-anchor="middle" dominant-baseline="central" style="font-size:18px;font-weight:800;fill:'+c+';font-family:Inter,sans-serif">'+v.toFixed(1)+'</text></svg>'}
+function fmH(d,di,ds,ct){var p=d.ind.map(function(i){return'<code>('+V[i.id].toFixed(1)+'×'+i.w+')</code>'});return'<strong>สูตร:</strong> Domain = '+p.join(' + ')+' = <strong style="color:'+d.c+'">'+ds.toFixed(2)+'</strong><br><strong>→ AAI:</strong> <code>'+ds.toFixed(2)+' × '+d.w+'</code> = <strong style="color:'+d.c+'">'+ct.toFixed(2)+'</strong>'}
+function ffH(ds,aai){var p=D.map(function(d,i){return'<span style="color:'+d.cm+'">('+ds[i].toFixed(1)+'×'+d.w+')</span>'});return'AAI = '+p.join(' <span style="color:#94a3b8">+</span> ')+' <span style="color:#94a3b8">= </span><span class="ff-result">'+aai.toFixed(2)+'</span>'}
+function render(){var r=calc(),ds=r.ds,ct=r.ct,aai=r.aai,df=aai-64.6,cl=df>=-0.05?'up':'down',ar=df>=-0.05?'▲':'▼';
+var h='<div class="header"><div class="header-tag">National Elderly Data Platform</div><h1>ดัชนีพฤฒพลัง <span>AAI Dashboard</span></h1><p>ความสูงวัยอย่างมีพลัง · 4 มิติ · ถ่วงน้ำหนัก 30/15/30/25 · ฉบับปรับสำหรับไทย</p><div class="header-meta"><span>📊 อ้างอิงกรอบ UNECE</span><span>🇹🇭 ข้อมูลฐาน พ.ศ. 2564</span></div></div>';
+h+='<div class="kpi-grid"><div class="kpi-main"><div class="label">AAI SCORE</div><div class="value" id="kA">'+aai.toFixed(1)+'</div><div class="diff '+cl+'" id="kD">'+ar+' '+Math.abs(df).toFixed(1)+' จากฐาน 64.6</div></div>';
+D.forEach(function(d,i){h+='<div class="kpi-domain '+(exp===d.id?'active':'')+'" style="border-color:'+(exp===d.id?'color-mix(in srgb,'+d.c+' 45%,transparent)':'var(--border)')+'" onclick="tgl(\''+d.id+'\')"><div class="d-label">'+d.e+'</div><div id="g-'+d.id+'">'+gH(ds[i],d.c)+'</div><div class="d-contrib" id="ct-'+d.id+'" style="color:'+d.c+'">×'+(d.w*100).toFixed(0)+'% = '+ct[i].toFixed(1)+'</div></div>'});
+h+='</div><div class="stack-section"><div class="stack-label">สัดส่วนองค์ประกอบ AAI = <span id="sT">'+aai.toFixed(1)+'</span></div><div class="stack-bar">';
+D.forEach(function(d,i){var p=(ct[i]/Math.max(aai,1))*100;h+='<div class="stack-seg" id="sg-'+d.id+'" style="width:'+p+'%;background:'+d.c+'">'+(p>10?'<span>'+ct[i].toFixed(1)+'</span>':'')+'</div>'});
+h+='</div><div class="stack-legend">';D.forEach(function(d){h+='<div class="leg"><span class="dot" style="background:'+d.c+'"></span>'+d.n+' ('+(d.w*100)+'%)</div>'});h+='</div></div>';
+h+='<div class="panels">';
+D.forEach(function(d,di){var ie=exp===d.id,c2=d.ind.length>4;
+h+='<div class="panel '+(ie?'expanded':'')+'" style="'+(ie?'border-color:'+'color-mix(in srgb,'+d.c+' 45%,transparent)':'')+'"><div class="panel-header" onclick="tgl(\''+d.id+'\')" style="background:'+(ie?d.cl:'transparent')+'"><div class="panel-dot" style="background:'+d.c+'"></div><div class="panel-info"><div class="panel-title">'+d.n+' <span style="font-weight:400;color:var(--text3);font-size:12px">('+d.e+')</span></div><div class="panel-sub">น้ำหนัก '+(d.w*100)+'% · '+d.ind.length+' ตัวชี้วัด</div></div><div class="panel-score"><div class="ps-val" style="color:'+d.c+'" id="ps-'+d.id+'">'+ds[di].toFixed(1)+'</div><div class="ps-contrib" id="pc-'+d.id+'">→ '+ct[di].toFixed(1)+' คะแนน</div></div><div class="panel-chevron">▼</div></div>';
+if(ie){h+='<div class="sliders"><div class="sliders-grid '+(c2?'cols2':'')+'">';
+d.ind.forEach(function(ind){var v=V[ind.id];
+h+='<div class="slider-row"><div class="slider-top"><span class="slider-label">'+ind.l+'</span><span class="slider-weight">w='+ind.w+'</span></div><div class="slider-control" style="--tc:'+d.c+'"><input type="range" min="0" max="100" step="0.5" value="'+v+'" id="r-'+ind.id+'" oninput="sl(\''+ind.id+'\',this.value,\''+d.id+'\','+di+')"><input type="number" min="0" max="100" step="0.1" value="'+v+'" id="n-'+ind.id+'" style="color:'+d.c+'" oninput="sl(\''+ind.id+'\',this.value,\''+d.id+'\','+di+')"></div><div class="hbar"><div class="hbar-bg" style="background:'+d.cl+'"></div><div class="hbar-fill" style="width:'+v+'%;background:'+d.c+'" id="b-'+ind.id+'"></div></div><div class="slider-weighted">Weight: <strong style="color:'+d.c+'" id="w-'+ind.id+'">'+(v*ind.w).toFixed(2)+'</strong></div></div>'});
+h+='</div><div class="formula-box" id="f-'+d.id+'">'+fmH(d,di,ds[di],ct[di])+'</div></div>'}
+h+='</div>'});
+h+='</div><div class="final-formula"><div class="ff-label">สูตรการคำนวณ AAI SCORE รวม</div><div class="ff-eq" id="fE">'+ffH(ds,aai)+'</div></div>';
+h+='<div class="reset-area"><button class="btn-reset" onclick="rst()">🔄 รีเซ็ตเป็นค่าเริ่มต้น (ข้อมูลจริง 2564)</button></div>';
+h+='<div class="footer"><p>Active Ageing Index — ฉบับปรับสำหรับไทย | อ้างอิง UNECE (2019), ASEAN AAI, สำนักงานสถิติแห่งชาติ (เผยแพร่ 2567) | NEDP</p></div>';
+document.getElementById('app').innerHTML=h}
+function fI(id){for(var a=0;a<D.length;a++)for(var b=0;b<D[a].ind.length;b++)if(D[a].ind[b].id===id)return D[a].ind[b];return null}
+function sl(id,rv,did,di){var v=parseFloat(rv);if(isNaN(v))v=0;v=Math.max(0,Math.min(100,v));V[id]=v;
+var rn=document.getElementById('r-'+id),nm=document.getElementById('n-'+id);
+if(rn&&document.activeElement!==rn)rn.value=v;if(nm&&document.activeElement!==nm)nm.value=v;
+var br=document.getElementById('b-'+id);if(br)br.style.width=v+'%';
+var ind=fI(id),wt=document.getElementById('w-'+id);if(wt&&ind)wt.textContent=(v*ind.w).toFixed(2);
+var r=calc(),ds=r.ds,ct=r.ct,aai=r.aai,df=aai-64.6;
+var kA=document.getElementById('kA');if(kA)kA.textContent=aai.toFixed(1);
+var kD=document.getElementById('kD');if(kD){kD.className='diff '+(df>=-0.05?'up':'down');kD.textContent=(df>=-0.05?'▲':'▼')+' '+Math.abs(df).toFixed(1)+' จากฐาน 64.6'}
+D.forEach(function(d,i){var g=document.getElementById('g-'+d.id);if(g)g.innerHTML=gH(ds[i],d.c);var c=document.getElementById('ct-'+d.id);if(c)c.textContent='×'+(d.w*100).toFixed(0)+'% = '+ct[i].toFixed(1);var p=document.getElementById('ps-'+d.id);if(p)p.textContent=ds[i].toFixed(1);var pc=document.getElementById('pc-'+d.id);if(pc)pc.textContent='→ '+ct[i].toFixed(1)+' คะแนน';var sg=document.getElementById('sg-'+d.id);if(sg){var pct=(ct[i]/Math.max(aai,1))*100;sg.style.width=pct+'%';sg.innerHTML=pct>10?'<span>'+ct[i].toFixed(1)+'</span>':''}});
+var sT=document.getElementById('sT');if(sT)sT.textContent=aai.toFixed(1);
+var fb=document.getElementById('f-'+did);if(fb)fb.innerHTML=fmH(D[di],di,ds[di],ct[di]);
+var fE=document.getElementById('fE');if(fE)fE.innerHTML=ffH(ds,aai)}
+function tgl(id){exp=exp===id?null:id;render()}
+function rst(){init();exp="employment";render()}
+/* Re-render when the app toggles theme (the parent flips the .dark class on our <html>), so already-built
+   nodes are recreated in the new theme. */
+try{new MutationObserver(function(){render();}).observe(document.documentElement,{attributes:true,attributeFilter:['class']});}catch(e){}
+render();
+</script>
+</body>
+</html>

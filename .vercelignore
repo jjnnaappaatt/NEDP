@@ -1,0 +1,11 @@
+# Never upload local secrets — env vars are set in the Vercel project instead.
+.env
+.env.local
+.env.*.local
+
+# Build / dev artifacts (Vercel rebuilds these).
+.next
+node_modules
+tsconfig.tsbuildinfo
+next-dev.out.log
+next-dev.err.log

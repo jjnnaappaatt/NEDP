@@ -1,0 +1,161 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* ── NEDP design tokens — Mintlify-inspired ────────────────────────────────
+   White canvas, hairline flat cards, black-pill primary, signature mint accent
+   (#00d4a4) for accent CTAs + active states, Inter (Latin) + Thai sans. Mint is
+   reserved for accent moments; black is the dominant action; tags carry tone-blue.
+   --on-primary / --on-accent give buttons the right text colour per mode/variant. */
+:root {
+  --page: #fafafa;          /* surface-soft canvas */
+  --surface-1: #ffffff;     /* cards */
+  --surface-2: #f3f4f4;     /* soft fills, chips, skeletons */
+  --border: #e5e5e5;        /* hairline */
+  --border-accent: #00d4a4; /* mint focus/active border */
+
+  --text-primary: #0a0a0a;  /* ink */
+  --text-secondary: #3a3a3c;/* slate */
+  --text-muted: #5a5a5c;    /* steel — ≥7:1 on white */
+  --text-accent: #0f766e;   /* readable dark-teal link (mint family, AA on white) */
+
+  --hero: #0a0a0a;          /* primary = black pill */
+  --hero-border: #0a0a0a;
+  --on-primary: #ffffff;    /* text on the primary button */
+  --on-accent: #0a0a0a;     /* text on the mint accent (black, per spec) */
+
+  --gold: #f59e0b;
+  --silver: #9ca3af;
+  --bronze: #b45309;
+
+  --accent: #00d4a4;        /* Mintlify mint — accent pills (black text), active dots/borders */
+  --accent-2: #00b48a;      /* deep mint */
+  --accent-soft: #def7f0;   /* soft mint tint background */
+
+  --success: #1ba673;
+  --success-bg: #e6f7f0;
+  --success-fg: #0a7a4f;     /* darker green for TEXT on success-bg (≥4.5:1; --success is too light) */
+  --warning: #c37d0d;
+  --warning-bg: #fbf0dd;
+  --warning-fg: #8a5a00;     /* darker amber for text on warning-bg */
+  --danger: #d45656;
+  --danger-bg: #fbeaea;
+  --danger-fg: #b02a2a;      /* darker red for text on danger-bg */
+
+  --card-radius: 12px;
+  /* Inter for Latin/numbers, IBM Plex Sans Thai for Thai (Inter has no Thai glyphs) */
+  --font-display: var(--font-inter), var(--font-thai);
+  --font-body: var(--font-inter), var(--font-thai);
+  color-scheme: light dark;
+}
+
+/* ── Dark theme — applied via a `.dark` class on <html> (set pre-paint by layout.tsx). Mintlify
+   ships no dark palette, so this is a tasteful derivation: near-black canvas, white-pill primary,
+   mint accent unchanged. Tokens flip so components invert without per-component edits. ── */
+:root.dark {
+    color-scheme: dark;
+    --page: #0a0a0a;
+    --surface-1: #161616;
+    --surface-2: #1f1f1f;
+    --border: #2a2a2a;
+    --border-accent: #00d4a4;
+
+    --text-primary: #f5f5f5;
+    --text-secondary: #b3b3b3;
+    --text-muted: #8a8a8a;
+    --text-accent: #2dd4bf;
+
+    --hero: #f5f5f5;          /* primary = white pill on dark */
+    --hero-border: #f5f5f5;
+    --on-primary: #0a0a0a;    /* black text on the white pill */
+    --on-accent: #0a0a0a;     /* black text on mint (both modes) */
+
+    --gold: #fbbf24;
+    --silver: #c2cad6;
+    --bronze: #d68a52;
+
+    --accent: #00d4a4;
+    --accent-2: #00b48a;
+    --accent-soft: #0c2b25;
+
+    --success: #34d399;
+    --success-bg: #0f2e22;
+    --success-fg: #34d399;     /* on the dark success-bg, the bright green text reads clearly */
+    --warning: #fbbf24;
+    --warning-bg: #332606;
+    --warning-fg: #fbbf24;
+    --danger: #f87171;
+    --danger-bg: #3a1414;
+    --danger-fg: #f87171;
+}
+
+@layer base {
+  html { -webkit-text-size-adjust: 100%; }
+  body {
+    background: var(--page);
+    color: var(--text-primary);
+    font-family: var(--font-body), "Noto Sans Thai", sans-serif;
+    font-size: 16px;
+    line-height: 1.6;
+    letter-spacing: -0.01em;
+    -webkit-font-smoothing: antialiased;
+  }
+  h1, h2, h3, .font-display { font-family: var(--font-display), sans-serif; }
+  button, .nowrap { white-space: nowrap; }
+}
+
+@layer components {
+  .card {
+    background: var(--surface-1);
+    border: 1px solid var(--border);
+    border-radius: var(--card-radius);
+  }
+  /* circular tinted icon badge — the ขุนทอง menu motif */
+  .icon-badge {
+    display: flex; align-items: center; justify-content: center;
+    width: 44px; height: 44px; border-radius: 9999px; flex: none;
+  }
+  .hero-heading {
+    font-family: var(--font-display), sans-serif;
+    font-weight: 600;
+    font-size: clamp(24px, 5vw, 36px);
+    /* Thai: room for วรรณยุกต์ (above) + สระล่าง ุ ู (below) so overflow:hidden never clips them. */
+    line-height: 1.45;
+    letter-spacing: -0.02em;
+    border-left: 3px solid var(--accent);
+    padding-left: 12px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+  /* Long titles (e.g. the /manage grid) wrap to full text instead of truncating. */
+  .hero-heading--wrap {
+    white-space: normal;
+    overflow: visible;
+    text-overflow: clip;
+  }
+}
+
+.safe-bottom { padding-bottom: env(safe-area-inset-bottom); }
+.no-scrollbar::-webkit-scrollbar { display: none; }
+.no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+
+/* ── Thai mark safety ─────────────────────────────────────────────────────────
+   Thai combining marks (วรรณยุกต์ ่ ้ ๊ ๋ ็ · สระบน ิ ี ึ ื ํ · สระล่าง ุ ู) extend above and below
+   the base glyph. Single-line truncation (.truncate) and .line-clamp-* use overflow:hidden, which
+   clips those marks at tight line-heights — so floor the line-height on any clipped text. Unlayered
+   so it wins over Tailwind's leading-* utilities on the same elements. */
+.truncate { line-height: 1.5; }
+[class*="line-clamp-"] { line-height: 1.55; }
+
+/* ── Route enter transition ───────────────────────────────────────────────────
+   app/template.tsx remounts this wrapper on every navigation. Pure CSS with `both` fill:
+   the from-state applies at first style resolution and resolves in 200ms with no JS
+   dependency — bounded cost even if hydration stalls (LINE WebView safety). */
+@media (prefers-reduced-motion: no-preference) {
+  .route-enter { animation: route-enter 0.2s ease-out both; }
+}
+@keyframes route-enter {
+  from { opacity: 0; transform: translateY(6px); }
+  to   { opacity: 1; transform: none; }
+}
