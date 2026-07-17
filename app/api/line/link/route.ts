@@ -110,7 +110,15 @@ export async function POST(req: Request) {
     },
   });
   if (acct) {
-    res.cookies.set(ACCOUNT_COOKIE, await signAccountToken(acct.id), ACCOUNT_COOKIE_OPTS);
+    // signAccountToken throws when no session secret is configured (ACCOUNT_SESSION_SECRET or its
+    // ADMIN_SESSION_SECRET fallback). Guard it so a mis-provisioned env returns a clear, diagnosable
+    // error instead of an opaque unhandled 500 that the client can only read as "not logged in".
+    try {
+      res.cookies.set(ACCOUNT_COOKIE, await signAccountToken(acct.id), ACCOUNT_COOKIE_OPTS);
+    } catch (e) {
+      console.error("[line/link] failed to sign account session cookie", e);
+      return NextResponse.json({ error: "session secret not configured" }, { status: 500 });
+    }
   }
   return res;
 }

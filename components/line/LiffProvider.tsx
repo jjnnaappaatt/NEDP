@@ -108,14 +108,26 @@ export function LiffProvider({ children }: { children: ReactNode }) {
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({ accessToken }),
         });
-        const data = res.ok ? await res.json() : null;
+        // Surface a failed link instead of swallowing it. A silent `null` here is exactly what turned
+        // any link failure — a channel-id 401, a missing-secret 500 — into a mute "not logged in" loop
+        // (the button re-opens LINE, comes back, still guest, no reason shown). Now the real status
+        // reaches the connect UI and the console so the cause is diagnosable.
+        let data: { line?: LineProfile | null; account?: LineAccount | null } | null = null;
+        let linkError: string | null = null;
+        if (res.ok) {
+          data = await res.json();
+        } else {
+          const body = (await res.json().catch(() => null)) as { error?: string } | null;
+          linkError = `เชื่อมต่อ LINE ไม่สำเร็จ (${res.status}): ${body?.error ?? res.statusText}`;
+          console.warn("[LIFF] /api/line/link failed", res.status, body);
+        }
         if (!cancelled) {
           setState({
             ready: true,
             inClient,
             profile: data?.line ?? null,
             account: data?.account ?? null,
-            error: null,
+            error: linkError,
           });
           // The picture_url is persisted by /api/line/link AFTER the response, so the page was
           // server-rendered with the old (no-photo) avatar. Re-fetch RSC ONCE so the TopBar/profile
