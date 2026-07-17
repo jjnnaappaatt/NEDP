@@ -7,8 +7,8 @@ const DESC =
   "คู่มือการใช้งานระบบ NEDP สำหรับเจ้าหน้าที่ภาคสนาม — เปิดจาก LINE, บันทึกคะแนน AAI รายบุคคล 4 มิติ, ดูผลรายพื้นที่ และการแจ้งเตือน";
 
 // The manual is a PUBLIC, shareable guide website (no login / no LINE). These tags give a pasted link
-// a proper social preview card. Add your own /manual/og.png (1200x630) and an `images` field back in
-// to enable a social preview image — omitted here since this repo ships without one.
+// a proper social preview card. og:image is a static brand card (no domain/QR baked in), so it's safe
+// to ship as-is — no metadataBase dependency needed for it.
 export const metadata: Metadata = {
   title: TITLE,
   description: DESC,
@@ -20,11 +20,13 @@ export const metadata: Metadata = {
     url: "/manual",
     title: TITLE,
     description: DESC,
+    images: [{ url: "/manual/og.png", width: 1200, height: 630, alt: TITLE }],
   },
   twitter: {
-    card: "summary",
+    card: "summary_large_image",
     title: TITLE,
     description: DESC,
+    images: ["/manual/og.png"],
   },
 };
 

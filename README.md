@@ -30,11 +30,11 @@ Projects across Thailand each run their own elderly-screening questionnaire (fal
 
 ### 💬 LINE Official Account
 
-| | |
-|---|---|
-| ![LINE rich menu — the six-button navigation shown under the chat, giving one-tap access to submit, status, ranking, and account management](docs/screenshots/line/rich-menu.png) | ![LIFF login screen inside LINE — signing in with a LINE identity to link a field-officer account](docs/screenshots/line/liff-login.png) |
-|:--:|:--:|
-| Rich menu | LIFF login |
+![LIFF login screen inside LINE — signing in with a LINE identity to link a field-officer account](docs/screenshots/line/liff-login.png)
+
+*LIFF login*
+
+For the LINE plumbing on its own (LIFF, signed webhooks, push/Flex, reminders, RSVP — no `@line/bot-sdk`), see **[line-oa-nextjs-starter](https://github.com/jjnnaappaatt/line-oa-nextjs-starter)**, a self-contained teaching repo this one shares its LINE fundamentals with.
 
 ---
 
