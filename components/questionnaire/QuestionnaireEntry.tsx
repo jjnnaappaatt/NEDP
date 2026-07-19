@@ -17,11 +17,13 @@ const errMsg = (e?: string) =>
   e === "not_contact" ? "ต้องเป็นผู้รับผิดชอบโครงการ"
     : e === "no_questionnaire" ? "โครงการนี้ยังไม่ได้กำหนดแบบสอบถาม" : "บันทึกไม่สำเร็จ";
 
-export function QuestionnaireEntry({ projectId, personId, personCode, schema, modules, canEdit, prefill, onSaved }: {
+export function QuestionnaireEntry({ projectId, personId, personCode, schema, modules, canEdit, prefill, onSaved, bundleId }: {
   projectId: string; personId: string; personCode: string;
   schema: QuestionnaireSchema; modules: string[]; canEdit: boolean; prefill?: PrefillPerson;
   /** Called after a successful submit (e.g. so a parent sheet can reload the person's AAI). */
   onSaved?: (overall: number | null) => void;
+  /** When set, this entry is inside a SMART bundle → the submit also mirrors to the other member projects. */
+  bundleId?: string;
 }) {
   const [round, setRound] = useState<"pre" | "post">("pre");
   const [busy, setBusy] = useState(false);
@@ -30,9 +32,9 @@ export function QuestionnaireEntry({ projectId, personId, personCode, schema, mo
   const submit = async (answers: Record<string, string | string[]>) => {
     setBusy(true); setResult(null);
     try {
-      const res = await fetch("/api/questionnaire/submit", {
+      const res = await fetch(bundleId ? "/api/special/submit" : "/api/questionnaire/submit", {
         method: "POST", headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ projectId, personId, round, answers }),
+        body: JSON.stringify({ projectId, personId, round, answers, bundleId }),
       });
       const d = (await res.json().catch(() => ({}))) as SubmitResult;
       setResult(d.ok ? d : { error: d.error });

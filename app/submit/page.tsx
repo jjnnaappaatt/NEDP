@@ -3,13 +3,19 @@ import { redirect } from "next/navigation";
 import { IconChevronRight, IconMapPin } from "@tabler/icons-react";
 import { getMyProjects } from "@/lib/data";
 import { getCurrentMonth } from "@/lib/format";
+import { isBundleId, bundleById } from "@/lib/specialProjects";
 
 export const dynamic = "force-dynamic";
+
+/** Where a project card / redirect points — a bundle goes to its merged entry, a real project to its own. */
+function submitHref(projectId: string): string {
+  return isBundleId(projectId) ? `/submit/special/${bundleById(projectId)!.id}` : `/submit/${projectId}`;
+}
 
 /** ส่งข้อมูล portal — pick a project to enter this month's data. (Jumps straight in if there's only one.) */
 export default async function SubmitPickerPage() {
   const mine = await getMyProjects(getCurrentMonth());
-  if (mine.length === 1) redirect(`/submit/${mine[0].project.id}`);
+  if (mine.length === 1) redirect(submitHref(mine[0].project.id));
 
   return (
     <div className="space-y-4">
@@ -28,7 +34,7 @@ export default async function SubmitPickerPage() {
       ) : (
         <div className="space-y-2">
           {mine.map((m) => (
-            <Link key={m.project.id} href={`/submit/${m.project.id}`} className="card flex items-center gap-3 p-4 hover:border-border-accent">
+            <Link key={m.project.id} href={submitHref(m.project.id)} className="card flex items-center gap-3 p-4 hover:border-border-accent">
               <span className="icon-badge" style={{ background: "var(--accent-soft)", color: "var(--text-accent)" }}>
                 <IconMapPin size={22} />
               </span>

@@ -3,6 +3,7 @@ import { supabaseAdmin } from "@/lib/supabase/server";
 import { replyMessages, getProfile, manualHeroCard } from "./push";
 import { APP_URL, LIFF } from "./liff";
 import { matchCommand, isCancel, isExactCancel, labelOf, type CommandKey } from "./fuzzy";
+import { bundleForSecret, type SpecialProject } from "@/lib/specialProjects";
 
 /**
  * Inbound LINE bot handler — ported from aai_mvp/app/monitor_routes.py `/line/webhook`. Text commands
@@ -11,7 +12,7 @@ import { matchCommand, isCancel, isExactCancel, labelOf, type CommandKey } from 
  * quick-reply chips (the rich menu remains the primary visual UX).
  */
 const MANUAL_URL = `${APP_URL}/manual`; // public guide website (no login)
-const MANUAL_IMG = `${APP_URL}/manual/line-manual.png`; // square poster (1040²) for the tappable Flex hero card — add your own branded /manual/line-manual.png when self-hosting
+const MANUAL_IMG = `${APP_URL}/manual/line-manual.png`; // square poster (1040²) for the tappable Flex hero card
 
 const ABBR = ["", "ม.ค.", "ก.พ.", "มี.ค.", "เม.ย.", "พ.ค.", "มิ.ย.", "ก.ค.", "ส.ค.", "ก.ย.", "ต.ค.", "พ.ย.", "ธ.ค."];
 function reportMonth(now = new Date()): { rm: string; label: string } {
@@ -181,6 +182,30 @@ async function handleCancel(db: Db, text: string, targetId: string, replyToken?:
   return cmdManage(db, targetId, replyToken);
 }
 
+/** Secret "smart" auto-register: subscribe the sender to ALL member projects of the bundle (mirrors both
+ *  the bot's monitor_contacts and the web project_account_registrations, same as the subscribe route), so
+ *  their web console shows the merged special project. Ensures a web account exists first. */
+async function handleSmart(db: Db, bundle: SpecialProject, targetId: string, replyToken?: string) {
+  let { data: acct } = await db.from("accounts").select("id").eq("line_user_id", targetId).maybeSingle();
+  let name: string | null = null;
+  if (!acct) {
+    const prof = await getProfile(targetId).catch(() => null);
+    name = prof?.name ?? "ผู้ใช้ LINE";
+    const { data: created } = await db.from("accounts")
+      .insert({ name, line_user_id: targetId, avatar_color: "#1a56db", source_kind: "line" })
+      .select("id").single();
+    acct = created ?? null;
+  }
+  let ok = 0;
+  for (const pid of bundle.memberSourceIds) {
+    const { error } = await db.rpc("web_line_subscribe", { p_pid: pid, p_line_user_id: targetId, p_name: name });
+    if (!error) ok++;
+  }
+  return reply(replyToken, ok === bundle.memberSourceIds.length
+    ? `✅ ลงทะเบียนโครงการ ${bundle.name} เรียบร้อยแล้ว — เปิดเว็บแอปเพื่อกรอกแบบคัดกรองครบทั้ง 3 ด้านได้เลยค่ะ`
+    : `ลงทะเบียนได้ ${ok}/${bundle.memberSourceIds.length} โครงการ โปรดลองใหม่อีกครั้งค่ะ`);
+}
+
 async function handleText(db: Db, text: string, targetId: string | null, replyToken?: string) {
   const t = (text || "").trim();
   // issue-capture FSM: free text is captured as the issue; an EXACT command drops back to normal
@@ -204,6 +229,10 @@ async function handleText(db: Db, text: string, targetId: string | null, replyTo
     }
   }
   if (isCancel(t)) { if (targetId) return handleCancel(db, t, targetId, replyToken); }
+
+  // Secret bundle command (e.g. "smart") — not in the fuzzy table, so it stays hidden from menus.
+  const smartBundle = bundleForSecret(t);
+  if (smartBundle && targetId) return handleSmart(db, smartBundle, targetId, replyToken);
 
   const [cmd, , suggestions] = matchCommand(t);
   if (cmd && targetId) return dispatchCommand(db, cmd, targetId, replyToken);

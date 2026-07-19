@@ -7,13 +7,19 @@ import { IconBadge } from "@/components/ui/IconBadge";
 import { RawExportCard } from "@/components/reports/RawExportCard";
 import { getMyProjects, getLeaderboard, getExportMonths } from "@/lib/data";
 import { getCurrentMonth, monthLabelThai } from "@/lib/format";
+import { isBundleId, resolveToRealProject } from "@/lib/specialProjects";
 import type { SubmissionStatus } from "@/types";
 
 export const dynamic = "force-dynamic";
 
 export default async function ReportsPage() {
   const month = getCurrentMonth();
-  const [mine, standings] = await Promise.all([getMyProjects(month), getLeaderboard(month)]);
+  const [mineRaw, standings] = await Promise.all([getMyProjects(month), getLeaderboard(month)]);
+  // Export/report routes need one real project id — resolve a SMART bundle row to its primary member
+  // (which holds the full-copy data), keeping the bundle name for display.
+  const mine = mineRaw.map((m) =>
+    isBundleId(m.project.id) ? { ...m, project: { ...m.project, id: resolveToRealProject(m.project.id) } } : m,
+  );
 
   // ── User-scoped summary ────────────────────────────────────────
   const myStandings = standings.filter((s) => s.isMe);

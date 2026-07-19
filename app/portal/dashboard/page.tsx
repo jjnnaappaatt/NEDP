@@ -1,13 +1,15 @@
 import Link from "next/link";
-import { getMyPortalProjects, getAaiSnapshotSummary } from "@/lib/data";
-import { AaiDashboard } from "@/components/portal/AaiDashboard";
+import { getMyPortalProjects, getAaiSnapshotSummary, getProjectSurveyDashboard } from "@/lib/data";
+import { DashboardTabs } from "@/components/portal/DashboardTabs";
+import { resolveToRealProject } from "@/lib/specialProjects";
 
 export const dynamic = "force-dynamic";
 
 /**
- * Interactive AAI-by-area dashboard (individual-level snapshot rollup), scoped to the signed-in user's
- * registered projects: จังหวัด/อำเภอ/ตำบล toggles, per-project checkboxes, three time-points. Initial
- * province-level rows are fetched server-side (one pass, no streaming — LINE WebView paints on load).
+ * The user's "Dashboard": BOTH the AAI-by-area dashboard (individual-level snapshot rollup, จังหวัด/อำเภอ/
+ * ตำบล drilldown, three time-points) AND each project's own questionnaire (survey) dashboard, under one
+ * toggle. Scoped to the signed-in user's registered projects. Initial province-level AAI rows + the first
+ * project's survey are fetched server-side (LINE WebView paints on load).
  */
 export default async function PortalDashboardPage() {
   const projects = await getMyPortalProjects();
@@ -16,7 +18,7 @@ export default async function PortalDashboardPage() {
     return (
       <div className="space-y-5">
         <header>
-          <h1 className="hero-heading hero-heading--wrap">AAI Area Dashboard</h1>
+          <h1 className="hero-heading hero-heading--wrap">Dashboard</h1>
         </header>
         <div className="card p-8 text-center text-ink-soft">
           คุณยังไม่ได้เป็นผู้รับผิดชอบโครงการใด — <Link href="/submit" className="text-accent hover:underline">ลงทะเบียนโครงการ</Link>
@@ -26,17 +28,25 @@ export default async function PortalDashboardPage() {
   }
 
   const ids = projects.map((p) => p.id);
-  const initialRows = await getAaiSnapshotSummary({ level: "province", projectIds: ids });
+  const [initialRows, initialSurvey] = await Promise.all([
+    getAaiSnapshotSummary({ level: "province", projectIds: ids }),
+    getProjectSurveyDashboard(resolveToRealProject(projects[0].id)),
+  ]);
 
   return (
     <div className="space-y-5">
       <header>
-        <h1 className="hero-heading hero-heading--wrap">AAI Area Dashboard</h1>
+        <h1 className="hero-heading hero-heading--wrap">Dashboard</h1>
         <p className="mt-2 text-sm text-ink-soft">
-          สรุปคะแนน AAI รายบุคคล รวมตามจังหวัด/อำเภอ/ตำบล · เริ่มต้น → เดือนที่แล้ว → ล่าสุด
+          ภาพรวมโครงการของคุณ — คะแนน AAI รายพื้นที่ และผลแบบสอบถามเฉพาะโครงการ
         </p>
       </header>
-      <AaiDashboard projects={projects} initialRows={initialRows} />
+      <DashboardTabs
+        projects={projects}
+        initialAaiRows={initialRows}
+        initialSurvey={initialSurvey}
+        initialSurveyProjectId={projects[0].id}
+      />
     </div>
   );
 }

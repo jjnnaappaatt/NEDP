@@ -9,6 +9,7 @@ import { cache } from "react";
 import { supabaseAdmin } from "@/lib/supabase/server";
 import { CURRENT_MONTH, prevMonth } from "@/lib/format";
 import { meId, isProjectContact, isIntegrationEnabled, _num, _toPersonRow, type PersonRow } from "./_core";
+import { bundleForRegs, bundleProjectId, expandProjectIds } from "@/lib/specialProjects";
 
 export type DimensionStat = { key: string; before: number | null; after: number | null; count: number };
 
@@ -378,9 +379,11 @@ export async function getAaiSnapshotSummary(input: {
   const db = supabaseAdmin();
   const latest = input.latestMonth ?? CURRENT_MONTH;
   const prev = input.prevMonth ?? prevMonth(latest);
+  // Bundle ids ("special:smart") expand to their member project uuids before the rollup RPC.
+  const pids = input.projectIds && input.projectIds.length ? expandProjectIds(input.projectIds) : null;
   const { data } = await db.rpc("aai_rollup_snapshots", {
     p_level: input.level, p_latest_month: latest, p_prev_month: prev,
-    p_project_ids: input.projectIds && input.projectIds.length ? input.projectIds : null,
+    p_project_ids: pids,
   });
   const rows = ((data ?? []) as Record<string, unknown>[]).map((r) => {
     const sup = r.suppressed === true;
@@ -414,8 +417,13 @@ export async function getMyPortalProjects(): Promise<PickerProject[]> {
   const ids = [...new Set((regs ?? []).map((r) => r.project_id as string))];
   if (!ids.length) return [];
   const { data } = await db.from("projects").select("id,name,researcher,org").in("id", ids).order("name");
-  return ((data ?? []) as { id: string; name: string; researcher: string | null; org: string | null }[])
+  const list = ((data ?? []) as { id: string; name: string; researcher: string | null; org: string | null }[])
     .map((r) => ({ id: r.id, name: r.name, owner: r.researcher || r.org || "" }));
+  // Collapse a fully-registered bundle into one picker entry (its member ids expand at the RPC boundary).
+  const bundle = bundleForRegs(list.map((p) => p.id));
+  if (!bundle) return list;
+  const rest = list.filter((p) => !bundle.memberIds.includes(p.id));
+  return [{ id: bundleProjectId(bundle.id), name: bundle.name, owner: "SMART" }, ...rest];
 }
 
 export type ProvinceProjectProgress = { projectId: string; projectName: string; row: AaiSnapshotRow | null };

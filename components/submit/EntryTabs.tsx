@@ -23,7 +23,7 @@ const SHOW_BACKUP_TOOLS = false;
  * location_submissions pipeline) are kept as a collapsible "สำรอง" backup so nothing is lost.
  */
 export function EntryTabs({
-  projectId, template, locations, areaTree, doneIds, submissions, hints, canEdit, meName, monthLabel, history,
+  projectId, template, locations, areaTree, doneIds, submissions, hints, canEdit, meName, monthLabel, history, bundleId,
 }: {
   projectId: string;
   template: ProjectTemplate;
@@ -36,6 +36,8 @@ export function EntryTabs({
   meName: string;
   monthLabel: string;
   history: MonthHistory[];
+  /** Set when this entry is inside a SMART bundle → per-person questionnaire submits mirror to all members. */
+  bundleId?: string;
 }) {
   const [tab, setTab] = useState<BackupTab>("perlocation");
   const tabCls = (active: boolean) =>
@@ -47,7 +49,7 @@ export function EntryTabs({
       {/* MAIN view */}
       <section className="space-y-3">
         <h2 className="border-l-4 border-accent pl-2 font-display text-base font-semibold text-ink">กรอกข้อมูลพื้นที่</h2>
-        <IndividualEntry projectId={projectId} areaTree={areaTree} canEdit={canEdit} />
+        <IndividualEntry projectId={projectId} areaTree={areaTree} canEdit={canEdit} bundleId={bundleId} />
       </section>
 
       {/* BACKUP tools — collapsible (hidden behind SHOW_BACKUP_TOOLS; kept in code) */}

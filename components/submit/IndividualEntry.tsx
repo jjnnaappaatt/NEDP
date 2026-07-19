@@ -15,8 +15,8 @@ import type { ProjectAreaTree } from "@/lib/data";
  * Drilling is client-side over the server-passed tree; writes call router.refresh() to recompute status.
  */
 export function IndividualEntry({
-  projectId, areaTree, canEdit,
-}: { projectId: string; areaTree: ProjectAreaTree; canEdit: boolean }) {
+  projectId, areaTree, canEdit, bundleId,
+}: { projectId: string; areaTree: ProjectAreaTree; canEdit: boolean; bundleId?: string }) {
   const router = useRouter();
   const [provCode, setProvCode] = useState<string | null>(null);
   const [amphCode, setAmphCode] = useState<string | null>(null);
@@ -123,7 +123,7 @@ export function IndividualEntry({
         </>
       )}
 
-      <PersonSheet personId={openPersonId} onClose={() => setOpenPersonId(null)} onSaved={bump}
+      <PersonSheet personId={openPersonId} onClose={() => setOpenPersonId(null)} onSaved={bump} bundleId={bundleId}
         onScored={(overall) => setToast(`บันทึกคะแนน AAI แล้ว — คะแนนรวม ${overall ?? "—"}`)} />
 
       {toast && (

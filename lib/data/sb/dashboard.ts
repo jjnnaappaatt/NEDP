@@ -13,6 +13,27 @@ import { getLeaderboard, getProjects, getFollowingIds } from "./accounts";
 import { getLocationStatuses } from "./locations";
 import { getAdminIssues, getEditRequests, getHeadRequests, getQuestionnaireRequests } from "./admin";
 import { getAaiSnapshotSummary, type AaiSnapshotRow } from "./aai";
+import { bundleForRegs, bundleProjectId } from "@/lib/specialProjects";
+
+/** Collapse a bundle's member projects into ONE synthetic special-project entry, but ONLY when the user is
+ *  registered to ALL members. Single-registrants + everyone else pass through unchanged. */
+function collapseBundle(mapped: MyProjectStatus[]): MyProjectStatus[] {
+  const bundle = bundleForRegs(mapped.map((m) => m.project.id));
+  if (!bundle) return mapped;
+  const members = mapped.filter((m) => bundle.memberIds.includes(m.project.id));
+  if (members.length < bundle.memberIds.length) return mapped;
+  const rest = mapped.filter((m) => !bundle.memberIds.includes(m.project.id));
+  const base = members[0];
+  const synthetic: MyProjectStatus = {
+    project: { ...base.project, id: bundleProjectId(bundle.id), name: bundle.name },
+    status: members.every((m) => m.status === "submitted") ? "submitted"
+      : members.some((m) => m.status !== "not_started") ? "draft" : "not_started",
+    points: members.reduce((s, m) => s + (m.points ?? 0), 0) || undefined,
+    locationsDone: members.reduce((s, m) => s + m.locationsDone, 0),
+    locationsTotal: members.reduce((s, m) => s + m.locationsTotal, 0),
+  };
+  return [synthetic, ...rest];
+}
 
 // cache() per-request: the dashboard's KPI + projects sections AND getDashboardSummary all call this
 // with the same month — dedupe the standings/location-status fan-out to a single compute per render.
@@ -29,7 +50,7 @@ export const getMyProjects = cache(async function getMyProjects(month = CURRENT_
   const pMap = new Map(projects.map((p) => [p.id, p]));
   const myRegs = (regs ?? []).filter((r) => pMap.has(r.project_id));
   const statuses = await Promise.all(myRegs.map((r) => getLocationStatuses(r.project_id, month)));
-  return myRegs.map((r, i) => {
+  const mapped: MyProjectStatus[] = myRegs.map((r, i) => {
     const project = pMap.get(r.project_id)!;
     const locs = statuses[i];
     const locationsDone = locs.filter((l) => l.submitted).length;
@@ -39,6 +60,7 @@ export const getMyProjects = cache(async function getMyProjects(month = CURRENT_
     const points = standings.find((st) => st.project.id === r.project_id && st.isMe)?.totalPoints;
     return { project, status, points, locationsDone, locationsTotal };
   });
+  return collapseBundle(mapped);
 });
 
 export type NotificationItem = {

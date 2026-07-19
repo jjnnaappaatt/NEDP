@@ -3,6 +3,7 @@ import { Card } from "@/components/ui/Card";
 import { StatusBadge } from "@/components/ui/Badge";
 import { IconTrophy, IconMapPin, IconArrowRight, IconPencil } from "@tabler/icons-react";
 import { UnregisterButton } from "@/components/status/UnregisterButton";
+import { isBundleId, bundleById, resolveToRealProject } from "@/lib/specialProjects";
 import type { MyProjectStatus } from "@/types";
 
 /**
@@ -13,6 +14,9 @@ export function ProjectStatusCard({ item }: { item: MyProjectStatus }) {
   const { project, status, points, locationsDone, locationsTotal } = item;
   const done = locationsTotal > 0 && locationsDone === locationsTotal;
   const pct = locationsTotal === 0 ? 0 : Math.round((locationsDone / locationsTotal) * 100);
+  const bundle = isBundleId(project.id);
+  const submitHref = bundle ? `/submit/special/${bundleById(project.id)!.id}` : `/submit/${project.id}`;
+  const statusHref = `/status/${resolveToRealProject(project.id)}`;
 
   return (
     <Card className="flex flex-col gap-3 animate-fadeUp">
@@ -24,7 +28,7 @@ export function ProjectStatusCard({ item }: { item: MyProjectStatus }) {
             ผู้รับผิดชอบ: {project.researcher || project.org || "—"}
           </p>
         </div>
-        <UnregisterButton projectId={project.id} projectName={project.name} />
+        {!bundle && <UnregisterButton projectId={project.id} projectName={project.name} />}
       </div>
 
       <div className="flex flex-wrap items-center gap-2">
@@ -47,13 +51,13 @@ export function ProjectStatusCard({ item }: { item: MyProjectStatus }) {
 
       <div className="mt-auto flex gap-2">
         <Link
-          href={`/submit/${project.id}`}
+          href={submitHref}
           className="inline-flex min-h-[44px] flex-1 items-center justify-center whitespace-nowrap rounded-card bg-accent px-3 text-[15px] font-medium text-[var(--on-accent)] transition hover:brightness-110 active:brightness-95"
         >
           <IconPencil size={17} stroke={2} className="mr-1.5" /> ส่งข้อมูล
         </Link>
         <Link
-          href={`/status/${project.id}`}
+          href={statusHref}
           className="inline-flex min-h-[44px] flex-1 items-center justify-center whitespace-nowrap rounded-card border border-border bg-surface px-3 text-[15px] font-medium text-ink transition hover:bg-surface-soft"
         >
           <span>สถานะ/จัดการ</span>

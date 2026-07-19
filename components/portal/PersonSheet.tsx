@@ -17,8 +17,8 @@ type PrefillQ = { sex: string | null; education: number | null; occupation: numb
 /** In-flow person view + 4-domain entry, in a bottom-sheet (mobile) / dialog (desktop). Fetches detail
  *  via /api/portal/person-detail; re-loads on save and signals the parent to refresh folder status. */
 export function PersonSheet({
-  personId, onClose, onSaved, onScored,
-}: { personId: string | null; onClose: () => void; onSaved: () => void; onScored?: (overall: number | null) => void }) {
+  personId, onClose, onSaved, onScored, bundleId,
+}: { personId: string | null; onClose: () => void; onSaved: () => void; onScored?: (overall: number | null) => void; bundleId?: string }) {
   const [detail, setDetail] = useState<PersonDetail | null>(null);
   const [q, setQ] = useState<{ assigned: AssignedQ; prefill: PrefillQ } | null>(null);
   const [loading, setLoading] = useState(false);
@@ -109,7 +109,7 @@ export function PersonSheet({
                   </a>
                 </div>
                 <QuestionnaireEntry projectId={detail.projectId} personId={detail.personId} personCode={detail.personCode}
-                  schema={q.assigned.schema} modules={q.assigned.modules} canEdit
+                  schema={q.assigned.schema} modules={q.assigned.modules} canEdit bundleId={bundleId}
                   prefill={q.prefill ? { sex: q.prefill.sex, education: q.prefill.education, occupation: q.prefill.occupation } : undefined}
                   onSaved={(overall) => { onScored?.(overall); onSaved(); void load(detail.personId); }} />
               </div>

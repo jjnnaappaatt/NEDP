@@ -22,7 +22,7 @@ export const NAV: NavItem[] = [
   { href: "/submit", label: "ส่งข้อมูล", icon: IconPencil, bar: true },
   { href: "/status", label: "สถานะ/จัดการ", barLabel: "สถานะ", icon: IconListCheck, bar: true },
   { href: "/leaderboard", label: "อันดับ", icon: IconTrophy, bar: true },
-  { href: "/portal/dashboard", label: "AAI Area Dashboard", icon: IconReportAnalytics },
+  { href: "/portal/dashboard", label: "Dashboard", icon: IconReportAnalytics },
   { href: "/reports", label: "รายงาน", icon: IconChartBar },
   { href: "/help", label: "ช่วยเหลือ", icon: IconHelpCircle },
 ];
