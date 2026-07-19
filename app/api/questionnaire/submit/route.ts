@@ -20,12 +20,20 @@ export async function POST(req: Request) {
   const assigned = await getAssignedQuestionnaire(projectId);
   if (!assigned) return NextResponse.json({ ok: false, error: "no_questionnaire" }, { status: 400 });
 
-  const prev = round === "post" ? await getPersonPreAnswers(personId) : null;
+  // Bound to projectId: only reads pre-answers for a person in THIS project (no cross-project leak).
+  const prev = round === "post" ? await getPersonPreAnswers(personId, projectId) : null;
   const { rawAnswers, toolScores, riskSummary } = buildClinical(answers, prev, assigned.schema);
 
   const res = await submitClinicalAssessment({
     projectId, personId, round, yearMonth, questionnaireId: assigned.questionnaireId,
     qAnswers: answers, rawAnswers, toolScores, status: "submitted",
   });
-  return NextResponse.json({ ...res, riskSummary, toolScores }, { status: res.ok ? 200 : res.error === "not_contact" ? 403 : 400 });
+  // Never return computed scores on a denied/failed write — only on success.
+  if (!res.ok) {
+    const error = res.error === "round_conflict"
+      ? "มีแบบประเมินอีกรอบของเดือนนี้อยู่แล้ว — บันทึกรอบใหม่ในเดือนถัดไป หรือแก้ไขรายการเดิม (ไม่ทับข้อมูลเดิม)"
+      : res.error;
+    return NextResponse.json({ ...res, error }, { status: res.error === "not_contact" ? 403 : 400 });
+  }
+  return NextResponse.json({ ...res, riskSummary, toolScores }, { status: 200 });
 }

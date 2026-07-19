@@ -62,6 +62,11 @@ export function QuestionnaireEntry({ projectId, personId, personCode, schema, mo
             <IconCircleCheck size={20} /> บันทึกแบบสอบถามของ {personCode} แล้ว
             {result.overall != null && <span className="ml-1 text-ink-soft">· คะแนน AAI รวม {result.overall}</span>}
           </div>
+          {result.overall == null && (
+            <div className="rounded-card border border-warning/40 bg-warning-bg/40 p-3 text-sm text-warning-fg">
+              ⚠ ยังคำนวณ AAI ไม่ได้ (ข้อมูลไม่ครบ) — บันทึกแล้วแต่ยังไม่นับว่าเสร็จสมบูรณ์ โปรดตรวจสอบคำตอบส่วนข้อมูลทั่วไป (อายุ/อาชีพ/AAI Q1–Q8)
+            </div>
+          )}
           <PersonToolScores scores={view} riskSummary={result.riskSummary} labelOverrides={surveyScoreLabels(schema)} />
           <button onClick={() => setResult(null)} className="rounded-card border border-border px-4 py-2 text-sm text-ink-soft hover:bg-surface">
             กรอกรอบใหม่ / แก้ไข

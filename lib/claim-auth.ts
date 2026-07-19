@@ -11,7 +11,10 @@
  */
 import { timingSafeEqualStr } from "./admin-auth";
 
-export const CLAIM_TTL_SECONDS = 60 * 60 * 24 * 14; // 14 days
+// Short TTL limits the takeover window if a claim link is forwarded/leaked. The claim RPC also binds only
+// while the account is still an unclaimed placeholder (source_kind='project' AND line_user_id IS NULL), so a
+// link is effectively single-use once claimed. Deliver links out-of-band (not in a shared inbox).
+export const CLAIM_TTL_SECONDS = 60 * 60 * 48; // 48 hours (was 14 days)
 const TTL_MS = CLAIM_TTL_SECONDS * 1000;
 
 const enc = new TextEncoder();

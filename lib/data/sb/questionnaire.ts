@@ -61,6 +61,15 @@ export async function submitClinicalAssessment(input: {
   const { data: prow } = await db.from("persons").select("project_id").eq("id", input.personId).maybeSingle();
   if (!prow) return { ok: false, error: "not_found" };
   if (!(await isProjectContact(String(prow.project_id)))) return { ok: false, error: "not_contact" };
+  // Same-month cross-round guard: the unique key is (person_id, year_month) only, so a different-round
+  // submit in the same month silently OVERWRITES (destroys) the other round's row (e.g. post clobbers the
+  // pre baseline). Block it — a same-round re-submit is a legit edit and still upserts. AUDIT → same-month.
+  const ym = input.yearMonth ?? CURRENT_MONTH;
+  const { data: existingRow } = await db.from("person_assessments").select("round")
+    .eq("person_id", input.personId).eq("year_month", ym).maybeSingle();
+  if (existingRow?.round && input.round && String(existingRow.round) !== input.round) {
+    return { ok: false, error: "round_conflict" };
+  }
   const { data, error } = await db.rpc("assess_person_clinical", {
     p_person_id: input.personId, p_round: input.round || "pre", p_year_month: input.yearMonth ?? CURRENT_MONTH,
     p_questionnaire_id: input.questionnaireId, p_q_answers: input.qAnswers,
@@ -144,11 +153,14 @@ export async function getPersonPrefill(personId: string, projectId: string): Pro
   };
 }
 
-/** The person's latest submitted/approved Pre questionnaire answers (for D3 cross-visit + height prefill). */
-export async function getPersonPreAnswers(personId: string): Promise<Record<string, unknown> | null> {
+/** The person's latest submitted/approved Pre questionnaire answers (for D3 cross-visit + height prefill).
+ *  Bound to `projectId` so a caller can only read pre-answers for a person IN a project they belong to —
+ *  a person in another project returns null (no cross-project answer leak). See AUDIT → preanswers-cross-project. */
+export async function getPersonPreAnswers(personId: string, projectId: string): Promise<Record<string, unknown> | null> {
   const db = supabaseAdmin();
   const { data } = await db.from("person_assessments").select("q_answers")
-    .eq("person_id", personId).eq("round", "pre").in("status", ["submitted", "approved"])
+    .eq("person_id", personId).eq("project_id", projectId)
+    .eq("round", "pre").in("status", ["submitted", "approved"])
     .order("created_at", { ascending: false }).limit(1).maybeSingle();
   return (data?.q_answers as Record<string, unknown>) ?? null;
 }
@@ -170,7 +182,7 @@ export async function getPersonToolScores(personAssessmentId: string): Promise<P
 }
 
 export type QuestionnaireSummaryRow = { label: string; mean: number | null; n: number; flagged: number };
-export type ProjectQuestionnaireSummary = { rows: QuestionnaireSummaryRow[]; nPersons: number };
+export type ProjectQuestionnaireSummary = { rows: QuestionnaireSummaryRow[]; nPersons: number; suppressed?: boolean };
 
 /** Project-level summary of the assigned questionnaire's computed scores (for the report): each tool /
  *  declared specific score → mean · N · flagged, over each person's LATEST questionnaire assessment. */
@@ -199,6 +211,10 @@ export async function getProjectQuestionnaireSummary(projectId: string): Promise
   }
   const aids = [...latestByPerson.values()];
   if (aids.length === 0) return { rows: [], nPersons: 0 };
+  // k-anonymity: a <5-person project (or report) must not print per-tool means/flags — a small-n mean
+  // (n=1 → the single person's exact score) re-identifies an elder. Mirrors getProjectSurveyDashboard.
+  const K = 5;
+  if (latestByPerson.size < K) return { rows: [], nPersons: latestByPerson.size, suppressed: true };
 
   // Tool scores for those assessments — chunk the id list AND page within each chunk (a clinical
   // assessment yields ~24 tool rows, so 200 ids × 24 > 1000 without paging).
@@ -226,7 +242,15 @@ export async function getProjectQuestionnaireSummary(projectId: string): Promise
   }
   const rows: QuestionnaireSummaryRow[] = order.map((code) => {
     const a = agg.get(code)!;
-    return { label: labelMap[code] ?? code, mean: a.n ? Math.round((a.sum / a.n) * 10) / 10 : null, n: a.n, flagged: a.flagged };
+    // Per-tool k-anon: a conditionally-scored tool completed by <5 people is blanked (mean/flagged),
+    // even in a project that otherwise clears the whole-project floor.
+    const tSup = a.n < K;
+    return {
+      label: labelMap[code] ?? code,
+      mean: tSup || !a.n ? null : Math.round((a.sum / a.n) * 10) / 10,
+      n: a.n,
+      flagged: tSup ? 0 : a.flagged,
+    };
   });
   return { rows, nPersons: latestByPerson.size };
 }

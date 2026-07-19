@@ -370,8 +370,8 @@ export async function getAssignedQuestionnaireInfo(projectId: string): Promise<{
 export async function getPersonPrefill(personId: string, projectId: string) {
   return USE_SUPABASE ? sb.getPersonPrefill(personId, projectId) : null;
 }
-export async function getPersonPreAnswers(personId: string) {
-  return USE_SUPABASE ? sb.getPersonPreAnswers(personId) : null;
+export async function getPersonPreAnswers(personId: string, projectId: string) {
+  return USE_SUPABASE ? sb.getPersonPreAnswers(personId, projectId) : null;
 }
 export async function submitClinicalAssessment(input: Parameters<typeof sb.submitClinicalAssessment>[0]) {
   return USE_SUPABASE ? sb.submitClinicalAssessment(input) : { ok: false as const, error: "mock" };
